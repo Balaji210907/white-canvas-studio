@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DiagnosisRouteImport } from './routes/diagnosis'
 import { Route as HealthRouteImport } from './routes/health'
+import { Route as HistoryRouteImport } from './routes/history'
 import { Route as MissionRouteImport } from './routes/mission'
 import { Route as TelemetryRouteImport } from './routes/telemetry'
 import { Route as TwinRouteImport } from './routes/twin'
@@ -29,6 +30,11 @@ const DiagnosisRoute = DiagnosisRouteImport.update({
 const HealthRoute = HealthRouteImport.update({
   id: '/health',
   path: '/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HistoryRoute = HistoryRouteImport.update({
+  id: '/history',
+  path: '/history',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MissionRoute = MissionRouteImport.update({
@@ -51,6 +57,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/diagnosis': typeof DiagnosisRoute
   '/health': typeof HealthRoute
+  '/history': typeof HistoryRoute
   '/mission': typeof MissionRoute
   '/telemetry': typeof TelemetryRoute
   '/twin': typeof TwinRoute
@@ -59,6 +66,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/diagnosis': typeof DiagnosisRoute
   '/health': typeof HealthRoute
+  '/history': typeof HistoryRoute
   '/mission': typeof MissionRoute
   '/telemetry': typeof TelemetryRoute
   '/twin': typeof TwinRoute
@@ -68,6 +76,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/diagnosis': typeof DiagnosisRoute
   '/health': typeof HealthRoute
+  '/history': typeof HistoryRoute
   '/mission': typeof MissionRoute
   '/telemetry': typeof TelemetryRoute
   '/twin': typeof TwinRoute
@@ -75,14 +84,28 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/diagnosis' | '/health' | '/mission' | '/telemetry' | '/twin'
+    | '/'
+    | '/diagnosis'
+    | '/health'
+    | '/history'
+    | '/mission'
+    | '/telemetry'
+    | '/twin'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/diagnosis' | '/health' | '/mission' | '/telemetry' | '/twin'
+  to:
+    | '/'
+    | '/diagnosis'
+    | '/health'
+    | '/history'
+    | '/mission'
+    | '/telemetry'
+    | '/twin'
   id:
     | '__root__'
     | '/'
     | '/diagnosis'
     | '/health'
+    | '/history'
     | '/mission'
     | '/telemetry'
     | '/twin'
@@ -92,6 +115,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DiagnosisRoute: typeof DiagnosisRoute
   HealthRoute: typeof HealthRoute
+  HistoryRoute: typeof HistoryRoute
   MissionRoute: typeof MissionRoute
   TelemetryRoute: typeof TelemetryRoute
   TwinRoute: typeof TwinRoute
@@ -118,6 +142,13 @@ declare module '@tanstack/react-router' {
       path: '/health'
       fullPath: '/health'
       preLoaderRoute: typeof HealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/history': {
+      id: '/history'
+      path: '/history'
+      fullPath: '/history'
+      preLoaderRoute: typeof HistoryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/mission': {
@@ -148,6 +179,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DiagnosisRoute: DiagnosisRoute,
   HealthRoute: HealthRoute,
+  HistoryRoute: HistoryRoute,
   MissionRoute: MissionRoute,
   TelemetryRoute: TelemetryRoute,
   TwinRoute: TwinRoute,
