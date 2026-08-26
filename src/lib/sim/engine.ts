@@ -358,7 +358,7 @@ export class TwinSimulator {
             break;
         }
       } else {
-        this.stuckHold[id] = undefined;
+        delete this.stuckHold[id];
       }
 
       /* ---- data validation layer ---- */
@@ -450,7 +450,7 @@ export class TwinSimulator {
       return { id: s.id, p };
     }).sort((a, b) => b.p - a.p);
 
-    const topSensorSuspicion = sensorSuspicion[0];
+    const topSensorSuspicion = sensorSuspicion[0]!;
     const sensorFaultSuspected = topSensorSuspicion.p > 0.55;
 
     /* --- anomaly score from fused residuals, discounting suspect sensors --- */
@@ -496,7 +496,7 @@ export class TwinSimulator {
       anomalyScore * 0.42 +
       (1 - healthIndex / 100) * 0.33 +
       (1 - dataQuality) * 0.15 +
-      (faultProbs[0].id !== "none" ? faultProbs[0].p * 0.2 : 0);
+      (faultProbs[0]!.id !== "none" ? faultProbs[0]!.p * 0.2 : 0);
     const missionRisk = clamp(riskRaw, 0, 1);
     const missionRiskLevel: MissionRiskLevel =
       missionRisk > 0.72 ? "CRITICAL" : missionRisk > 0.48 ? "HIGH" : missionRisk > 0.24 ? "MEDIUM" : "LOW";
@@ -533,7 +533,7 @@ export class TwinSimulator {
         : status === "CRITICAL"
           ? "Reduce power to minimum safe setting, abort mission profile and initiate recovery. Ground inspection required."
           : status === "DEGRADED"
-            ? `Limit sustained high-load operation. Schedule inspection for ${ENGINE_FAULTS.find((x) => x.id === faultProbs[0].id)?.label ?? "top-ranked fault"}.`
+            ? `Limit sustained high-load operation. Schedule inspection for ${ENGINE_FAULTS.find((x) => x.id === faultProbs[0]!.id)?.label ?? "top-ranked fault"}.`
             : status === "WARNING"
               ? "Continue monitoring. Re-evaluate residual trend over next 5 minutes."
               : status === "INSUFFICIENT_DATA"
