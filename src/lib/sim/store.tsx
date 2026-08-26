@@ -88,7 +88,7 @@ export function TelemetryProvider({ children }: { children: ReactNode }) {
           newAlerts.push({
             id: `st-${s.seq}`,
             t: s.t,
-            severity: s.status === "CRITICAL" ? "CRITICAL" : s.status === "NORMAL" ? "INFO" : "WARNING",
+            severity: s.status === "CRITICAL" ? "CRITICAL" : "WARNING",
             source: s.status === "SENSOR_FAULT" ? "SENSOR" : "ENGINE",
             title: `Engine status → ${s.status.replace("_", " ")}`,
             detail: s.recommendation,
