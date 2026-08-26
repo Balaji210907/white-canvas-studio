@@ -15,6 +15,7 @@ import { Route as HealthRouteImport } from './routes/health'
 import { Route as HistoryRouteImport } from './routes/history'
 import { Route as MissionRouteImport } from './routes/mission'
 import { Route as ModelsRouteImport } from './routes/models'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SimulationRouteImport } from './routes/simulation'
 import { Route as SystemRouteImport } from './routes/system'
 import { Route as TelemetryRouteImport } from './routes/telemetry'
@@ -51,6 +52,11 @@ const ModelsRoute = ModelsRouteImport.update({
   path: '/models',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SimulationRoute = SimulationRouteImport.update({
   id: '/simulation',
   path: '/simulation',
@@ -84,6 +90,7 @@ export interface FileRoutesByFullPath {
   '/history': typeof HistoryRoute
   '/mission': typeof MissionRoute
   '/models': typeof ModelsRoute
+  '/settings': typeof SettingsRoute
   '/simulation': typeof SimulationRoute
   '/system': typeof SystemRoute
   '/telemetry': typeof TelemetryRoute
@@ -97,6 +104,7 @@ export interface FileRoutesByTo {
   '/history': typeof HistoryRoute
   '/mission': typeof MissionRoute
   '/models': typeof ModelsRoute
+  '/settings': typeof SettingsRoute
   '/simulation': typeof SimulationRoute
   '/system': typeof SystemRoute
   '/telemetry': typeof TelemetryRoute
@@ -111,6 +119,7 @@ export interface FileRoutesById {
   '/history': typeof HistoryRoute
   '/mission': typeof MissionRoute
   '/models': typeof ModelsRoute
+  '/settings': typeof SettingsRoute
   '/simulation': typeof SimulationRoute
   '/system': typeof SystemRoute
   '/telemetry': typeof TelemetryRoute
@@ -126,6 +135,7 @@ export interface FileRouteTypes {
     | '/history'
     | '/mission'
     | '/models'
+    | '/settings'
     | '/simulation'
     | '/system'
     | '/telemetry'
@@ -139,6 +149,7 @@ export interface FileRouteTypes {
     | '/history'
     | '/mission'
     | '/models'
+    | '/settings'
     | '/simulation'
     | '/system'
     | '/telemetry'
@@ -152,6 +163,7 @@ export interface FileRouteTypes {
     | '/history'
     | '/mission'
     | '/models'
+    | '/settings'
     | '/simulation'
     | '/system'
     | '/telemetry'
@@ -166,6 +178,7 @@ export interface RootRouteChildren {
   HistoryRoute: typeof HistoryRoute
   MissionRoute: typeof MissionRoute
   ModelsRoute: typeof ModelsRoute
+  SettingsRoute: typeof SettingsRoute
   SimulationRoute: typeof SimulationRoute
   SystemRoute: typeof SystemRoute
   TelemetryRoute: typeof TelemetryRoute
@@ -217,6 +230,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ModelsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/simulation': {
       id: '/simulation'
       path: '/simulation'
@@ -262,6 +282,7 @@ const rootRouteChildren: RootRouteChildren = {
   HistoryRoute: HistoryRoute,
   MissionRoute: MissionRoute,
   ModelsRoute: ModelsRoute,
+  SettingsRoute: SettingsRoute,
   SimulationRoute: SimulationRoute,
   SystemRoute: SystemRoute,
   TelemetryRoute: TelemetryRoute,
