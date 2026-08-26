@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DiagnosisRouteImport } from './routes/diagnosis'
 import { Route as HealthRouteImport } from './routes/health'
+import { Route as MissionRouteImport } from './routes/mission'
 import { Route as TelemetryRouteImport } from './routes/telemetry'
 import { Route as TwinRouteImport } from './routes/twin'
 
@@ -30,6 +31,11 @@ const HealthRoute = HealthRouteImport.update({
   path: '/health',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MissionRoute = MissionRouteImport.update({
+  id: '/mission',
+  path: '/mission',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TelemetryRoute = TelemetryRouteImport.update({
   id: '/telemetry',
   path: '/telemetry',
@@ -45,6 +51,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/diagnosis': typeof DiagnosisRoute
   '/health': typeof HealthRoute
+  '/mission': typeof MissionRoute
   '/telemetry': typeof TelemetryRoute
   '/twin': typeof TwinRoute
 }
@@ -52,6 +59,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/diagnosis': typeof DiagnosisRoute
   '/health': typeof HealthRoute
+  '/mission': typeof MissionRoute
   '/telemetry': typeof TelemetryRoute
   '/twin': typeof TwinRoute
 }
@@ -60,21 +68,31 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/diagnosis': typeof DiagnosisRoute
   '/health': typeof HealthRoute
+  '/mission': typeof MissionRoute
   '/telemetry': typeof TelemetryRoute
   '/twin': typeof TwinRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/diagnosis' | '/health' | '/telemetry' | '/twin'
+  fullPaths:
+    '/' | '/diagnosis' | '/health' | '/mission' | '/telemetry' | '/twin'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/diagnosis' | '/health' | '/telemetry' | '/twin'
-  id: '__root__' | '/' | '/diagnosis' | '/health' | '/telemetry' | '/twin'
+  to: '/' | '/diagnosis' | '/health' | '/mission' | '/telemetry' | '/twin'
+  id:
+    | '__root__'
+    | '/'
+    | '/diagnosis'
+    | '/health'
+    | '/mission'
+    | '/telemetry'
+    | '/twin'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DiagnosisRoute: typeof DiagnosisRoute
   HealthRoute: typeof HealthRoute
+  MissionRoute: typeof MissionRoute
   TelemetryRoute: typeof TelemetryRoute
   TwinRoute: typeof TwinRoute
 }
@@ -102,6 +120,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HealthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/mission': {
+      id: '/mission'
+      path: '/mission'
+      fullPath: '/mission'
+      preLoaderRoute: typeof MissionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/telemetry': {
       id: '/telemetry'
       path: '/telemetry'
@@ -123,6 +148,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DiagnosisRoute: DiagnosisRoute,
   HealthRoute: HealthRoute,
+  MissionRoute: MissionRoute,
   TelemetryRoute: TelemetryRoute,
   TwinRoute: TwinRoute,
 }
