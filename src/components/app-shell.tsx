@@ -59,13 +59,13 @@ const NAV: { group: string; items: { to: string; label: string; icon: typeof Gau
 ];
 
 function Clock({ t }: { t: number | null }) {
-  const d = t ? new Date(t) : new Date();
-  return (
-    <span className="mono-num text-xs text-muted-foreground">
-      {d.toISOString().slice(11, 19)} UTC
-    </span>
-  );
+  // Rendered only after hydration: a live clock cannot match the SSR snapshot.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const label = mounted ? new Date(t ?? Date.now()).toISOString().slice(11, 19) : "--:--:--";
+  return <span className="mono-num text-xs text-muted-foreground">{label} UTC</span>;
 }
+
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { latest, running, setRunning, resetRun, samples } = useTelemetry();
