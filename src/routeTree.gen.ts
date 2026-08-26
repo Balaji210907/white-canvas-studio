@@ -16,6 +16,7 @@ import { Route as HistoryRouteImport } from './routes/history'
 import { Route as MissionRouteImport } from './routes/mission'
 import { Route as ModelsRouteImport } from './routes/models'
 import { Route as SimulationRouteImport } from './routes/simulation'
+import { Route as SystemRouteImport } from './routes/system'
 import { Route as TelemetryRouteImport } from './routes/telemetry'
 import { Route as TwinRouteImport } from './routes/twin'
 import { Route as ValidationRouteImport } from './routes/validation'
@@ -55,6 +56,11 @@ const SimulationRoute = SimulationRouteImport.update({
   path: '/simulation',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SystemRoute = SystemRouteImport.update({
+  id: '/system',
+  path: '/system',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TelemetryRoute = TelemetryRouteImport.update({
   id: '/telemetry',
   path: '/telemetry',
@@ -79,6 +85,7 @@ export interface FileRoutesByFullPath {
   '/mission': typeof MissionRoute
   '/models': typeof ModelsRoute
   '/simulation': typeof SimulationRoute
+  '/system': typeof SystemRoute
   '/telemetry': typeof TelemetryRoute
   '/twin': typeof TwinRoute
   '/validation': typeof ValidationRoute
@@ -91,6 +98,7 @@ export interface FileRoutesByTo {
   '/mission': typeof MissionRoute
   '/models': typeof ModelsRoute
   '/simulation': typeof SimulationRoute
+  '/system': typeof SystemRoute
   '/telemetry': typeof TelemetryRoute
   '/twin': typeof TwinRoute
   '/validation': typeof ValidationRoute
@@ -104,6 +112,7 @@ export interface FileRoutesById {
   '/mission': typeof MissionRoute
   '/models': typeof ModelsRoute
   '/simulation': typeof SimulationRoute
+  '/system': typeof SystemRoute
   '/telemetry': typeof TelemetryRoute
   '/twin': typeof TwinRoute
   '/validation': typeof ValidationRoute
@@ -118,6 +127,7 @@ export interface FileRouteTypes {
     | '/mission'
     | '/models'
     | '/simulation'
+    | '/system'
     | '/telemetry'
     | '/twin'
     | '/validation'
@@ -130,6 +140,7 @@ export interface FileRouteTypes {
     | '/mission'
     | '/models'
     | '/simulation'
+    | '/system'
     | '/telemetry'
     | '/twin'
     | '/validation'
@@ -142,6 +153,7 @@ export interface FileRouteTypes {
     | '/mission'
     | '/models'
     | '/simulation'
+    | '/system'
     | '/telemetry'
     | '/twin'
     | '/validation'
@@ -155,6 +167,7 @@ export interface RootRouteChildren {
   MissionRoute: typeof MissionRoute
   ModelsRoute: typeof ModelsRoute
   SimulationRoute: typeof SimulationRoute
+  SystemRoute: typeof SystemRoute
   TelemetryRoute: typeof TelemetryRoute
   TwinRoute: typeof TwinRoute
   ValidationRoute: typeof ValidationRoute
@@ -211,6 +224,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SimulationRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/system': {
+      id: '/system'
+      path: '/system'
+      fullPath: '/system'
+      preLoaderRoute: typeof SystemRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/telemetry': {
       id: '/telemetry'
       path: '/telemetry'
@@ -243,6 +263,7 @@ const rootRouteChildren: RootRouteChildren = {
   MissionRoute: MissionRoute,
   ModelsRoute: ModelsRoute,
   SimulationRoute: SimulationRoute,
+  SystemRoute: SystemRoute,
   TelemetryRoute: TelemetryRoute,
   TwinRoute: TwinRoute,
   ValidationRoute: ValidationRoute,
