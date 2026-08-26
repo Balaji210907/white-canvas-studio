@@ -10,33 +10,167 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DiagnosisRouteImport } from './routes/diagnosis'
+import { Route as HealthRouteImport } from './routes/health'
+import { Route as HistoryRouteImport } from './routes/history'
+import { Route as MissionRouteImport } from './routes/mission'
+import { Route as ModelsRouteImport } from './routes/models'
+import { Route as SimulationRouteImport } from './routes/simulation'
+import { Route as SystemRouteImport } from './routes/system'
+import { Route as TelemetryRouteImport } from './routes/telemetry'
+import { Route as TwinRouteImport } from './routes/twin'
+import { Route as ValidationRouteImport } from './routes/validation'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DiagnosisRoute = DiagnosisRouteImport.update({
+  id: '/diagnosis',
+  path: '/diagnosis',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HealthRoute = HealthRouteImport.update({
+  id: '/health',
+  path: '/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HistoryRoute = HistoryRouteImport.update({
+  id: '/history',
+  path: '/history',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MissionRoute = MissionRouteImport.update({
+  id: '/mission',
+  path: '/mission',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ModelsRoute = ModelsRouteImport.update({
+  id: '/models',
+  path: '/models',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SimulationRoute = SimulationRouteImport.update({
+  id: '/simulation',
+  path: '/simulation',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SystemRoute = SystemRouteImport.update({
+  id: '/system',
+  path: '/system',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TelemetryRoute = TelemetryRouteImport.update({
+  id: '/telemetry',
+  path: '/telemetry',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TwinRoute = TwinRouteImport.update({
+  id: '/twin',
+  path: '/twin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ValidationRoute = ValidationRouteImport.update({
+  id: '/validation',
+  path: '/validation',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/diagnosis': typeof DiagnosisRoute
+  '/health': typeof HealthRoute
+  '/history': typeof HistoryRoute
+  '/mission': typeof MissionRoute
+  '/models': typeof ModelsRoute
+  '/simulation': typeof SimulationRoute
+  '/system': typeof SystemRoute
+  '/telemetry': typeof TelemetryRoute
+  '/twin': typeof TwinRoute
+  '/validation': typeof ValidationRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/diagnosis': typeof DiagnosisRoute
+  '/health': typeof HealthRoute
+  '/history': typeof HistoryRoute
+  '/mission': typeof MissionRoute
+  '/models': typeof ModelsRoute
+  '/simulation': typeof SimulationRoute
+  '/system': typeof SystemRoute
+  '/telemetry': typeof TelemetryRoute
+  '/twin': typeof TwinRoute
+  '/validation': typeof ValidationRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/diagnosis': typeof DiagnosisRoute
+  '/health': typeof HealthRoute
+  '/history': typeof HistoryRoute
+  '/mission': typeof MissionRoute
+  '/models': typeof ModelsRoute
+  '/simulation': typeof SimulationRoute
+  '/system': typeof SystemRoute
+  '/telemetry': typeof TelemetryRoute
+  '/twin': typeof TwinRoute
+  '/validation': typeof ValidationRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/diagnosis'
+    | '/health'
+    | '/history'
+    | '/mission'
+    | '/models'
+    | '/simulation'
+    | '/system'
+    | '/telemetry'
+    | '/twin'
+    | '/validation'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/diagnosis'
+    | '/health'
+    | '/history'
+    | '/mission'
+    | '/models'
+    | '/simulation'
+    | '/system'
+    | '/telemetry'
+    | '/twin'
+    | '/validation'
+  id:
+    | '__root__'
+    | '/'
+    | '/diagnosis'
+    | '/health'
+    | '/history'
+    | '/mission'
+    | '/models'
+    | '/simulation'
+    | '/system'
+    | '/telemetry'
+    | '/twin'
+    | '/validation'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DiagnosisRoute: typeof DiagnosisRoute
+  HealthRoute: typeof HealthRoute
+  HistoryRoute: typeof HistoryRoute
+  MissionRoute: typeof MissionRoute
+  ModelsRoute: typeof ModelsRoute
+  SimulationRoute: typeof SimulationRoute
+  SystemRoute: typeof SystemRoute
+  TelemetryRoute: typeof TelemetryRoute
+  TwinRoute: typeof TwinRoute
+  ValidationRoute: typeof ValidationRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +182,91 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/diagnosis': {
+      id: '/diagnosis'
+      path: '/diagnosis'
+      fullPath: '/diagnosis'
+      preLoaderRoute: typeof DiagnosisRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/health': {
+      id: '/health'
+      path: '/health'
+      fullPath: '/health'
+      preLoaderRoute: typeof HealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/history': {
+      id: '/history'
+      path: '/history'
+      fullPath: '/history'
+      preLoaderRoute: typeof HistoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mission': {
+      id: '/mission'
+      path: '/mission'
+      fullPath: '/mission'
+      preLoaderRoute: typeof MissionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/models': {
+      id: '/models'
+      path: '/models'
+      fullPath: '/models'
+      preLoaderRoute: typeof ModelsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/simulation': {
+      id: '/simulation'
+      path: '/simulation'
+      fullPath: '/simulation'
+      preLoaderRoute: typeof SimulationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/system': {
+      id: '/system'
+      path: '/system'
+      fullPath: '/system'
+      preLoaderRoute: typeof SystemRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/telemetry': {
+      id: '/telemetry'
+      path: '/telemetry'
+      fullPath: '/telemetry'
+      preLoaderRoute: typeof TelemetryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/twin': {
+      id: '/twin'
+      path: '/twin'
+      fullPath: '/twin'
+      preLoaderRoute: typeof TwinRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/validation': {
+      id: '/validation'
+      path: '/validation'
+      fullPath: '/validation'
+      preLoaderRoute: typeof ValidationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DiagnosisRoute: DiagnosisRoute,
+  HealthRoute: HealthRoute,
+  HistoryRoute: HistoryRoute,
+  MissionRoute: MissionRoute,
+  ModelsRoute: ModelsRoute,
+  SimulationRoute: SimulationRoute,
+  SystemRoute: SystemRoute,
+  TelemetryRoute: TelemetryRoute,
+  TwinRoute: TwinRoute,
+  ValidationRoute: ValidationRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
