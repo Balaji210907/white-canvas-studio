@@ -15,6 +15,7 @@ import { Grid, Html, OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 
 import type { EngineProfile, GeometrySpec } from "@/lib/engine/profile";
+import { buildParts } from "@/components/engine-parts";
 import { COMPONENT_STATUS_COLOR, type TwinState } from "@/lib/twin/state";
 
 export interface ViewerOptions {
