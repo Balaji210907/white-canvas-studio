@@ -17,6 +17,7 @@ import { Route as MissionRouteImport } from './routes/mission'
 import { Route as ModelsRouteImport } from './routes/models'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SimulationRouteImport } from './routes/simulation'
+import { Route as SourcesRouteImport } from './routes/sources'
 import { Route as SystemRouteImport } from './routes/system'
 import { Route as TelemetryRouteImport } from './routes/telemetry'
 import { Route as TwinRouteImport } from './routes/twin'
@@ -62,6 +63,11 @@ const SimulationRoute = SimulationRouteImport.update({
   path: '/simulation',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SourcesRoute = SourcesRouteImport.update({
+  id: '/sources',
+  path: '/sources',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SystemRoute = SystemRouteImport.update({
   id: '/system',
   path: '/system',
@@ -92,6 +98,7 @@ export interface FileRoutesByFullPath {
   '/models': typeof ModelsRoute
   '/settings': typeof SettingsRoute
   '/simulation': typeof SimulationRoute
+  '/sources': typeof SourcesRoute
   '/system': typeof SystemRoute
   '/telemetry': typeof TelemetryRoute
   '/twin': typeof TwinRoute
@@ -106,6 +113,7 @@ export interface FileRoutesByTo {
   '/models': typeof ModelsRoute
   '/settings': typeof SettingsRoute
   '/simulation': typeof SimulationRoute
+  '/sources': typeof SourcesRoute
   '/system': typeof SystemRoute
   '/telemetry': typeof TelemetryRoute
   '/twin': typeof TwinRoute
@@ -121,6 +129,7 @@ export interface FileRoutesById {
   '/models': typeof ModelsRoute
   '/settings': typeof SettingsRoute
   '/simulation': typeof SimulationRoute
+  '/sources': typeof SourcesRoute
   '/system': typeof SystemRoute
   '/telemetry': typeof TelemetryRoute
   '/twin': typeof TwinRoute
@@ -137,6 +146,7 @@ export interface FileRouteTypes {
     | '/models'
     | '/settings'
     | '/simulation'
+    | '/sources'
     | '/system'
     | '/telemetry'
     | '/twin'
@@ -151,6 +161,7 @@ export interface FileRouteTypes {
     | '/models'
     | '/settings'
     | '/simulation'
+    | '/sources'
     | '/system'
     | '/telemetry'
     | '/twin'
@@ -165,6 +176,7 @@ export interface FileRouteTypes {
     | '/models'
     | '/settings'
     | '/simulation'
+    | '/sources'
     | '/system'
     | '/telemetry'
     | '/twin'
@@ -180,6 +192,7 @@ export interface RootRouteChildren {
   ModelsRoute: typeof ModelsRoute
   SettingsRoute: typeof SettingsRoute
   SimulationRoute: typeof SimulationRoute
+  SourcesRoute: typeof SourcesRoute
   SystemRoute: typeof SystemRoute
   TelemetryRoute: typeof TelemetryRoute
   TwinRoute: typeof TwinRoute
@@ -244,6 +257,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SimulationRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sources': {
+      id: '/sources'
+      path: '/sources'
+      fullPath: '/sources'
+      preLoaderRoute: typeof SourcesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/system': {
       id: '/system'
       path: '/system'
@@ -284,6 +304,7 @@ const rootRouteChildren: RootRouteChildren = {
   ModelsRoute: ModelsRoute,
   SettingsRoute: SettingsRoute,
   SimulationRoute: SimulationRoute,
+  SourcesRoute: SourcesRoute,
   SystemRoute: SystemRoute,
   TelemetryRoute: TelemetryRoute,
   TwinRoute: TwinRoute,
