@@ -18,6 +18,27 @@ import type { EngineFaultId, SensorId, Subsystem } from "@/lib/config/registry";
 
 export type ComponentId = string;
 
+/**
+ * Representative part kind. Drives the procedural detail assembly rendered by
+ * the viewer. It is a VISUAL contract only — no engineering state depends on
+ * it, so registering real CAD later removes it without touching twin logic.
+ */
+export type PartDetail =
+  | "generic"
+  | "crankcase"
+  | "cylinder"
+  | "piston"
+  | "conrod"
+  | "crankshaft"
+  | "bearing"
+  | "oil"
+  | "fuel"
+  | "cooling"
+  | "intake"
+  | "exhaust"
+  | "ignition"
+  | "propshaft";
+
 export interface GeometrySpec {
   /** Primitive used by the generic representation. */
   shape: "box" | "cylinder" | "sphere" | "torus";
@@ -25,7 +46,10 @@ export interface GeometrySpec {
   position: [number, number, number];
   size: [number, number, number];
   rotation?: [number, number, number];
+  /** Representative part kind; defaults to the bare primitive. */
+  detail?: PartDetail;
 }
+
 
 export interface ComponentNode {
   id: ComponentId;
