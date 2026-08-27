@@ -32,12 +32,12 @@ function ValidationPage() {
   const metrics = useMemo(
     () =>
       SENSOR_SPECS.map((s) => {
-        const rows = samples.filter((x) => x.readings[s.id].value !== null);
+        const rows = samples.filter((x) => x.readings[s.id].value !== null && x.groundTruth);
         const n = rows.length || 1;
-        const errs = rows.map((x) => x.readings[s.id].truth - x.twin[s.id].expected);
+        const errs = rows.map((x) => x.groundTruth!.trueValues[s.id] - x.twin[s.id].expected);
         const mae = errs.reduce((a, e) => a + Math.abs(e), 0) / n;
         const rmse = Math.sqrt(errs.reduce((a, e) => a + e * e, 0) / n);
-        const meanTruth = rows.reduce((a, x) => a + x.readings[s.id].truth, 0) / n;
+        const meanTruth = rows.reduce((a, x) => a + x.groundTruth!.trueValues[s.id], 0) / n;
         const mape = meanTruth !== 0 ? (mae / Math.abs(meanTruth)) * 100 : 0;
         const bias = errs.reduce((a, e) => a + e, 0) / n;
         return { s, mae, rmse, mape, bias, n: rows.length };
@@ -65,9 +65,9 @@ function ValidationPage() {
 
   const errSeries = samples.slice(-120).map((s) => ({
     x: clockOf(s.t),
-    cht: +(s.readings.engTemp.truth - s.twin.engTemp.expected).toFixed(2),
-    oil: +(s.readings.oilPress.truth - s.twin.oilPress.expected).toFixed(3),
-    rpm: +((s.readings.rpm.truth - s.twin.rpm.expected) / 100).toFixed(2),
+    cht: +((s.groundTruth?.trueValues.engTemp ?? s.twin.engTemp.expected) - s.twin.engTemp.expected).toFixed(2),
+    oil: +((s.groundTruth?.trueValues.oilPress ?? s.twin.oilPress.expected) - s.twin.oilPress.expected).toFixed(3),
+    rpm: +(((s.groundTruth?.trueValues.rpm ?? s.twin.rpm.expected) - s.twin.rpm.expected) / 100).toFixed(2),
   }));
 
   const pct = (v: number) => (Number.isFinite(v) ? `${(v * 100).toFixed(1)}%` : "n/a");

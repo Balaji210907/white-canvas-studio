@@ -170,7 +170,7 @@ function DiagnosisPage() {
                 },
                 {
                   k: "Temporal behaviour",
-                  v: latest.state === "ACCELERATION" || latest.state === "START"
+                  v: latest.state === "ACCELERATION" || latest.state === "STARTING"
                     ? "Transient state — thresholds relaxed"
                     : "Quasi-steady operation",
                   ok: true,
