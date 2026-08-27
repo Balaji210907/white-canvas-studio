@@ -17,6 +17,7 @@ import { Route as HistoryRouteImport } from './routes/history'
 import { Route as ImportRouteImport } from './routes/import'
 import { Route as MissionRouteImport } from './routes/mission'
 import { Route as ModelsRouteImport } from './routes/models'
+import { Route as ReportRouteImport } from './routes/report'
 import { Route as ResidualsRouteImport } from './routes/residuals'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SimulationRouteImport } from './routes/simulation'
@@ -65,6 +66,11 @@ const MissionRoute = MissionRouteImport.update({
 const ModelsRoute = ModelsRouteImport.update({
   id: '/models',
   path: '/models',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReportRoute = ReportRouteImport.update({
+  id: '/report',
+  path: '/report',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ResidualsRoute = ResidualsRouteImport.update({
@@ -122,6 +128,7 @@ export interface FileRoutesByFullPath {
   '/import': typeof ImportRoute
   '/mission': typeof MissionRoute
   '/models': typeof ModelsRoute
+  '/report': typeof ReportRoute
   '/residuals': typeof ResidualsRoute
   '/settings': typeof SettingsRoute
   '/simulation': typeof SimulationRoute
@@ -141,6 +148,7 @@ export interface FileRoutesByTo {
   '/import': typeof ImportRoute
   '/mission': typeof MissionRoute
   '/models': typeof ModelsRoute
+  '/report': typeof ReportRoute
   '/residuals': typeof ResidualsRoute
   '/settings': typeof SettingsRoute
   '/simulation': typeof SimulationRoute
@@ -161,6 +169,7 @@ export interface FileRoutesById {
   '/import': typeof ImportRoute
   '/mission': typeof MissionRoute
   '/models': typeof ModelsRoute
+  '/report': typeof ReportRoute
   '/residuals': typeof ResidualsRoute
   '/settings': typeof SettingsRoute
   '/simulation': typeof SimulationRoute
@@ -182,6 +191,7 @@ export interface FileRouteTypes {
     | '/import'
     | '/mission'
     | '/models'
+    | '/report'
     | '/residuals'
     | '/settings'
     | '/simulation'
@@ -201,6 +211,7 @@ export interface FileRouteTypes {
     | '/import'
     | '/mission'
     | '/models'
+    | '/report'
     | '/residuals'
     | '/settings'
     | '/simulation'
@@ -220,6 +231,7 @@ export interface FileRouteTypes {
     | '/import'
     | '/mission'
     | '/models'
+    | '/report'
     | '/residuals'
     | '/settings'
     | '/simulation'
@@ -240,6 +252,7 @@ export interface RootRouteChildren {
   ImportRoute: typeof ImportRoute
   MissionRoute: typeof MissionRoute
   ModelsRoute: typeof ModelsRoute
+  ReportRoute: typeof ReportRoute
   ResidualsRoute: typeof ResidualsRoute
   SettingsRoute: typeof SettingsRoute
   SimulationRoute: typeof SimulationRoute
@@ -307,6 +320,13 @@ declare module '@tanstack/react-router' {
       path: '/models'
       fullPath: '/models'
       preLoaderRoute: typeof ModelsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/report': {
+      id: '/report'
+      path: '/report'
+      fullPath: '/report'
+      preLoaderRoute: typeof ReportRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/residuals': {
@@ -384,6 +404,7 @@ const rootRouteChildren: RootRouteChildren = {
   ImportRoute: ImportRoute,
   MissionRoute: MissionRoute,
   ModelsRoute: ModelsRoute,
+  ReportRoute: ReportRoute,
   ResidualsRoute: ResidualsRoute,
   SettingsRoute: SettingsRoute,
   SimulationRoute: SimulationRoute,
