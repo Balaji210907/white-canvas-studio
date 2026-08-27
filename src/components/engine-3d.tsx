@@ -11,10 +11,11 @@
 
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, type ThreeEvent } from "@react-three/fiber";
-import { Grid, Html, OrbitControls } from "@react-three/drei";
+import { Environment, Grid, Html, Lightformer, OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 
 import type { EngineProfile, GeometrySpec } from "@/lib/engine/profile";
+import { buildParts } from "@/components/engine-parts";
 import { COMPONENT_STATUS_COLOR, type TwinState } from "@/lib/twin/state";
 
 export interface ViewerOptions {
@@ -27,18 +28,13 @@ export interface ViewerOptions {
   overlay: "status" | "temperature" | "vibration" | "pressure";
 }
 
-function geometryFor(spec: GeometrySpec) {
-  const [a, b, c] = spec.size;
-  switch (spec.shape) {
-    case "cylinder":
-      return <cylinderGeometry args={[a, b, c, 28]} />;
-    case "sphere":
-      return <sphereGeometry args={[a, 20, 16]} />;
-    case "torus":
-      return <torusGeometry args={[a, b, 12, 28]} />;
-    default:
-      return <boxGeometry args={[a, b, c]} />;
-  }
+/** Apply a per-part lightness multiplier to the state colour. */
+function shadeColor(hex: string, shade: number) {
+  const c = new THREE.Color(hex);
+  const hsl = { h: 0, s: 0, l: 0 };
+  c.getHSL(hsl);
+  c.setHSL(hsl.h, hsl.s, Math.max(0.05, Math.min(0.95, hsl.l * shade)));
+  return c;
 }
 
 function ComponentMesh({
@@ -62,7 +58,7 @@ function ComponentMesh({
   onSelect: (id: string) => void;
   pulse: boolean;
 }) {
-  const ref = useRef<THREE.Mesh>(null);
+  const group = useRef<THREE.Group>(null);
   const [hover, setHover] = useState(false);
   const base = spec.position;
   const pos: [number, number, number] = [
@@ -71,21 +67,28 @@ function ComponentMesh({
     base[2] * (1 + explode * 1.1),
   ];
 
+  const parts = useMemo(() => buildParts(spec), [spec]);
+  const colors = useMemo(() => parts.map((p) => shadeColor(color, p.shade)), [parts, color]);
+
   useFrame(({ clock }) => {
-    if (!ref.current) return;
-    const m = ref.current.material as THREE.MeshStandardMaterial;
-    m.emissiveIntensity = pulse
-      ? 0.35 + 0.25 * Math.sin(clock.elapsedTime * 4)
+    if (!group.current) return;
+    const intensity = pulse
+      ? 0.32 + 0.22 * Math.sin(clock.elapsedTime * 4)
       : selected
-        ? 0.45
+        ? 0.4
         : hover
-          ? 0.25
-          : 0.05;
+          ? 0.22
+          : 0.04;
+    group.current.traverse((o) => {
+      const mesh = o as THREE.Mesh;
+      const m = mesh.material as THREE.MeshStandardMaterial | undefined;
+      if (m && "emissiveIntensity" in m) m.emissiveIntensity = intensity;
+    });
   });
 
   return (
-    <mesh
-      ref={ref}
+    <group
+      ref={group}
       position={pos}
       rotation={spec.rotation ?? [0, 0, 0]}
       onPointerOver={(e: ThreeEvent<PointerEvent>) => {
@@ -98,25 +101,31 @@ function ComponentMesh({
         onSelect(id);
       }}
     >
-      {geometryFor(spec)}
-      <meshStandardMaterial
-        color={color}
-        emissive={color}
-        transparent={dimmed}
-        opacity={dimmed ? 0.12 : 1}
-        roughness={0.55}
-        metalness={0.25}
-      />
+      {parts.map((p, i) => (
+        <mesh key={p.key} position={p.position} rotation={p.rotation ?? [0, 0, 0]}>
+          {p.geometry}
+          <meshStandardMaterial
+            color={colors[i] ?? color}
+            emissive={color}
+            transparent={dimmed}
+            opacity={dimmed ? 0.1 : 1}
+            roughness={p.roughness}
+            metalness={p.metalness}
+          />
+        </mesh>
+      ))}
       {(selected || hover) && !dimmed && (
         <Html distanceFactor={2.4} position={[0, 0.16, 0]} className="pointer-events-none">
           <div className="whitespace-nowrap rounded border border-border bg-card/95 px-1.5 py-0.5 text-[10px] font-semibold text-foreground shadow">
             {name}
+            <span className="ml-1 font-mono text-[9px] font-normal text-muted-foreground">{id}</span>
           </div>
         </Html>
       )}
-    </mesh>
+    </group>
   );
 }
+
 
 function SensorMarkers({
   profile,
@@ -134,22 +143,38 @@ function SensorMarkers({
         .map((s) => {
           const reading = state.frame?.readings[s.channel];
           const ok = reading && reading.status === "HEALTHY";
+          const col = ok ? "#1f6feb" : reading ? "#d18a19" : "#9aa3ad";
+          const loc = s.location as [number, number, number];
           return (
-            <mesh
+            <group
               key={s.tag}
-              position={s.location as [number, number, number]}
+              position={loc}
               onClick={(e: ThreeEvent<MouseEvent>) => {
                 e.stopPropagation();
                 onSelect(s.tag);
               }}
             >
-              <sphereGeometry args={[0.022, 14, 12]} />
-              <meshStandardMaterial
-                color={ok ? "#1f6feb" : reading ? "#d18a19" : "#9aa3ad"}
-                emissive={ok ? "#1f6feb" : "#d18a19"}
-                emissiveIntensity={0.4}
-              />
-            </mesh>
+              {/* mount boss */}
+              <mesh>
+                <cylinderGeometry args={[0.012, 0.014, 0.02, 12]} />
+                <meshStandardMaterial color={col} metalness={0.7} roughness={0.35} />
+              </mesh>
+              {/* sensor body */}
+              <mesh position={[0, 0.024, 0]}>
+                <cylinderGeometry args={[0.009, 0.009, 0.03, 12]} />
+                <meshStandardMaterial color={col} emissive={col} emissiveIntensity={0.35} metalness={0.6} roughness={0.4} />
+              </mesh>
+              {/* harness lead */}
+              <mesh position={[0, 0.05, 0]} rotation={[0, 0, 0.5]}>
+                <cylinderGeometry args={[0.003, 0.003, 0.05, 8]} />
+                <meshStandardMaterial color="#4a5158" metalness={0.2} roughness={0.9} />
+              </mesh>
+              <Html distanceFactor={3} position={[0, 0.085, 0]} className="pointer-events-none">
+                <div className="whitespace-nowrap rounded border border-border bg-card/90 px-1 text-[9px] font-mono text-muted-foreground">
+                  {s.tag}
+                </div>
+              </Html>
+            </group>
           );
         })}
     </>
@@ -237,10 +262,19 @@ export default function Engine3D({
   return (
     <Canvas camera={{ position: [1.5, 0.9, 1.6], fov: 40 }} dpr={[1, 1.75]} shadows={false}>
       <color attach="background" args={["#f4f6f8"]} />
-      <ambientLight intensity={0.75} />
-      <directionalLight position={[3, 5, 2]} intensity={1.1} />
+      <hemisphereLight args={["#ffffff", "#c8ced4", 0.55]} />
+      <ambientLight intensity={0.45} />
+      <directionalLight position={[3, 5, 2]} intensity={1.05} />
       <directionalLight position={[-3, 2, -2]} intensity={0.35} />
+      <directionalLight position={[0, -2, 3]} intensity={0.2} />
       <Suspense fallback={null}>
+        {/* Local light probe — gives metal parts something to reflect. No CDN HDR. */}
+        <Environment resolution={128}>
+          <Lightformer intensity={1.6} position={[0, 3, 0]} scale={[6, 6, 1]} />
+          <Lightformer intensity={0.7} color="#dfe6ec" position={[-4, 1, 1]} rotation-y={Math.PI / 2} scale={[8, 3, 1]} />
+          <Lightformer intensity={0.5} color="#c9d3db" position={[4, 1, -1]} rotation-y={-Math.PI / 2} scale={[8, 3, 1]} />
+        </Environment>
+
         <group onPointerMissed={() => onSelect(null)}>
           {meshes.map((c) => {
             const cs = state.components[c.id];
