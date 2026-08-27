@@ -11,7 +11,7 @@
 
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, type ThreeEvent } from "@react-three/fiber";
-import { Grid, Html, OrbitControls } from "@react-three/drei";
+import { Environment, Grid, Html, Lightformer, OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 
 import type { EngineProfile, GeometrySpec } from "@/lib/engine/profile";
