@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuditRouteImport } from './routes/audit'
 import { Route as ConfigurationRouteImport } from './routes/configuration'
 import { Route as CybersecurityRouteImport } from './routes/cybersecurity'
 import { Route as DiagnosisRouteImport } from './routes/diagnosis'
@@ -32,6 +33,11 @@ import { Route as ValidationRouteImport } from './routes/validation'
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuditRoute = AuditRouteImport.update({
+  id: '/audit',
+  path: '/audit',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ConfigurationRoute = ConfigurationRouteImport.update({
@@ -127,6 +133,7 @@ const ValidationRoute = ValidationRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/audit': typeof AuditRoute
   '/configuration': typeof ConfigurationRoute
   '/cybersecurity': typeof CybersecurityRoute
   '/diagnosis': typeof DiagnosisRoute
@@ -148,6 +155,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/audit': typeof AuditRoute
   '/configuration': typeof ConfigurationRoute
   '/cybersecurity': typeof CybersecurityRoute
   '/diagnosis': typeof DiagnosisRoute
@@ -170,6 +178,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/audit': typeof AuditRoute
   '/configuration': typeof ConfigurationRoute
   '/cybersecurity': typeof CybersecurityRoute
   '/diagnosis': typeof DiagnosisRoute
@@ -193,6 +202,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/audit'
     | '/configuration'
     | '/cybersecurity'
     | '/diagnosis'
@@ -214,6 +224,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/audit'
     | '/configuration'
     | '/cybersecurity'
     | '/diagnosis'
@@ -235,6 +246,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/audit'
     | '/configuration'
     | '/cybersecurity'
     | '/diagnosis'
@@ -257,6 +269,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuditRoute: typeof AuditRoute
   ConfigurationRoute: typeof ConfigurationRoute
   CybersecurityRoute: typeof CybersecurityRoute
   DiagnosisRoute: typeof DiagnosisRoute
@@ -284,6 +297,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/audit': {
+      id: '/audit'
+      path: '/audit'
+      fullPath: '/audit'
+      preLoaderRoute: typeof AuditRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/configuration': {
@@ -417,6 +437,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuditRoute: AuditRoute,
   ConfigurationRoute: ConfigurationRoute,
   CybersecurityRoute: CybersecurityRoute,
   DiagnosisRoute: DiagnosisRoute,
