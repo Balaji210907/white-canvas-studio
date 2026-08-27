@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ConfigurationRouteImport } from './routes/configuration'
+import { Route as CybersecurityRouteImport } from './routes/cybersecurity'
 import { Route as DiagnosisRouteImport } from './routes/diagnosis'
 import { Route as HealthRouteImport } from './routes/health'
 import { Route as HistoryRouteImport } from './routes/history'
@@ -36,6 +37,11 @@ const IndexRoute = IndexRouteImport.update({
 const ConfigurationRoute = ConfigurationRouteImport.update({
   id: '/configuration',
   path: '/configuration',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CybersecurityRoute = CybersecurityRouteImport.update({
+  id: '/cybersecurity',
+  path: '/cybersecurity',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DiagnosisRoute = DiagnosisRouteImport.update({
@@ -122,6 +128,7 @@ const ValidationRoute = ValidationRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/configuration': typeof ConfigurationRoute
+  '/cybersecurity': typeof CybersecurityRoute
   '/diagnosis': typeof DiagnosisRoute
   '/health': typeof HealthRoute
   '/history': typeof HistoryRoute
@@ -142,6 +149,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/configuration': typeof ConfigurationRoute
+  '/cybersecurity': typeof CybersecurityRoute
   '/diagnosis': typeof DiagnosisRoute
   '/health': typeof HealthRoute
   '/history': typeof HistoryRoute
@@ -163,6 +171,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/configuration': typeof ConfigurationRoute
+  '/cybersecurity': typeof CybersecurityRoute
   '/diagnosis': typeof DiagnosisRoute
   '/health': typeof HealthRoute
   '/history': typeof HistoryRoute
@@ -185,6 +194,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/configuration'
+    | '/cybersecurity'
     | '/diagnosis'
     | '/health'
     | '/history'
@@ -205,6 +215,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/configuration'
+    | '/cybersecurity'
     | '/diagnosis'
     | '/health'
     | '/history'
@@ -225,6 +236,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/configuration'
+    | '/cybersecurity'
     | '/diagnosis'
     | '/health'
     | '/history'
@@ -246,6 +258,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ConfigurationRoute: typeof ConfigurationRoute
+  CybersecurityRoute: typeof CybersecurityRoute
   DiagnosisRoute: typeof DiagnosisRoute
   HealthRoute: typeof HealthRoute
   HistoryRoute: typeof HistoryRoute
@@ -278,6 +291,13 @@ declare module '@tanstack/react-router' {
       path: '/configuration'
       fullPath: '/configuration'
       preLoaderRoute: typeof ConfigurationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cybersecurity': {
+      id: '/cybersecurity'
+      path: '/cybersecurity'
+      fullPath: '/cybersecurity'
+      preLoaderRoute: typeof CybersecurityRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/diagnosis': {
@@ -398,6 +418,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ConfigurationRoute: ConfigurationRoute,
+  CybersecurityRoute: CybersecurityRoute,
   DiagnosisRoute: DiagnosisRoute,
   HealthRoute: HealthRoute,
   HistoryRoute: HistoryRoute,

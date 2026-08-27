@@ -69,8 +69,7 @@ function CyberPage() {
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <Metric
           label="Frame trust score"
-          value={trust === null ? "NO DATA" : `${(trust * 100).toFixed(1)}`}
-          unit={trust === null ? undefined : "%"}
+          value={trust === null ? "NO DATA" : `${(trust * 100).toFixed(1)}%`}
           tone={trust === null ? "neutral" : trust > 0.95 ? "ok" : trust > 0.6 ? "warn" : "crit"}
           provenance="calculated"
           hint={`Rolling window of the last ${Math.min(120, integrity.framesChecked)} frames.`}
