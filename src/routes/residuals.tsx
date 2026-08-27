@@ -4,16 +4,16 @@ import { SENSOR_SPECS } from "@/lib/sim/engine";
 import { Bar, Metric, Panel, PageHeader, ProvenanceTag, PrototypeNotice } from "@/components/ui-kit";
 import { TrendChart } from "@/components/charts";
 
-export const Route = createFileRoute("/twin")({
+export const Route = createFileRoute("/residuals")({
   head: () => ({
     meta: [
-      { title: "Digital Twin — AERO-TWIN AI" },
+      { title: "Twin Residual Analysis — AERO-TWIN AI" },
       {
         name: "description",
         content:
           "Physics-informed digital twin state, actual-vs-expected residual analysis and twin confidence for the simulated aero piston engine.",
       },
-      { property: "og:title", content: "Digital Twin — AERO-TWIN AI" },
+      { property: "og:title", content: "Twin Residual Analysis — AERO-TWIN AI" },
       {
         property: "og:description",
         content: "Actual vs expected engine state with residual decomposition and twin confidence.",
@@ -73,7 +73,7 @@ function TwinPage() {
   return (
     <>
       <PageHeader
-        title="Digital Twin"
+        title="Twin Residual Analysis"
         description="A physics-informed model of the engine runs alongside the live stream. Residuals are the difference between measured behaviour and the twin's expected behaviour under the same operating conditions."
       />
 
