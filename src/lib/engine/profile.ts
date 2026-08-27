@@ -134,7 +134,7 @@ function cylinder(i: number): ComponentNode[] {
       subsystem: "THERMAL",
       description: `Cylinder ${n} assembly: barrel, head, valves and cooling fins.`,
       parent: "CYLINDER_ASSY",
-      geometry: { shape: "cylinder", position: [x, 0.3, 0], size: [0.09, 0.09, 0.26] },
+      geometry: { shape: "cylinder", position: [x, 0.3, 0], size: [0.09, 0.09, 0.26] , detail: "cylinder"},
       influences: [`PISTON_${n}`, "EXHAUST", "COOLING"],
     },
     {
@@ -143,7 +143,7 @@ function cylinder(i: number): ComponentNode[] {
       subsystem: "MECHANICAL",
       description: `Piston, rings and gudgeon pin for cylinder ${n}.`,
       parent: "CYLINDER_ASSY",
-      geometry: { shape: "cylinder", position: [x, 0.14, 0], size: [0.075, 0.075, 0.07] },
+      geometry: { shape: "cylinder", position: [x, 0.14, 0], size: [0.075, 0.075, 0.07] , detail: "piston"},
       influences: [`CONROD_${n}`],
     },
     {
@@ -152,7 +152,7 @@ function cylinder(i: number): ComponentNode[] {
       subsystem: "MECHANICAL",
       description: `Connecting rod ${n} with big-end bearing shell.`,
       parent: "CRANK_ASSY",
-      geometry: { shape: "box", position: [x, 0.02, 0], size: [0.03, 0.14, 0.03] },
+      geometry: { shape: "box", position: [x, 0.02, 0], size: [0.03, 0.14, 0.03] , detail: "conrod"},
       influences: ["CRANKSHAFT"],
     },
   ];
@@ -174,7 +174,7 @@ const ENGINE_001_COMPONENTS: ComponentNode[] = [
     subsystem: "MECHANICAL",
     description: "Structural crankcase carrying the cylinder assembly and main bearings.",
     parent: "ENGINE",
-    geometry: { shape: "box", position: [0, -0.05, 0], size: [0.95, 0.2, 0.26] },
+    geometry: { shape: "box", position: [0, -0.05, 0], size: [0.95, 0.2, 0.26] , detail: "crankcase"},
     influences: ["BEARING_1", "BEARING_2"],
   },
   {
@@ -205,7 +205,7 @@ const ENGINE_001_COMPONENTS: ComponentNode[] = [
     subsystem: "MECHANICAL",
     description: "Rotating assembly transmitting piston force to the propeller shaft.",
     parent: "CRANK_ASSY",
-    geometry: { shape: "cylinder", position: [0, -0.05, 0], size: [0.04, 0.04, 0.86], rotation: [0, 0, Math.PI / 2] },
+    geometry: { shape: "cylinder", position: [0, -0.05, 0], size: [0.04, 0.04, 0.86], rotation: [0, 0, Math.PI / 2] , detail: "crankshaft"},
     influences: ["PROP_SHAFT", "BEARING_1", "BEARING_2"],
   },
   {
@@ -214,7 +214,7 @@ const ENGINE_001_COMPONENTS: ComponentNode[] = [
     subsystem: "MECHANICAL",
     description: "Forward main journal bearing, closest to the propeller load path.",
     parent: "CRANK_ASSY",
-    geometry: { shape: "torus", position: [0.36, -0.05, 0], size: [0.055, 0.018, 0.02], rotation: [0, Math.PI / 2, 0] },
+    geometry: { shape: "torus", position: [0.36, -0.05, 0], size: [0.055, 0.018, 0.02], rotation: [0, Math.PI / 2, 0] , detail: "bearing"},
     influences: ["CRANKSHAFT"],
   },
   {
@@ -223,7 +223,7 @@ const ENGINE_001_COMPONENTS: ComponentNode[] = [
     subsystem: "MECHANICAL",
     description: "Rear main journal bearing.",
     parent: "CRANK_ASSY",
-    geometry: { shape: "torus", position: [-0.36, -0.05, 0], size: [0.055, 0.018, 0.02], rotation: [0, Math.PI / 2, 0] },
+    geometry: { shape: "torus", position: [-0.36, -0.05, 0], size: [0.055, 0.018, 0.02], rotation: [0, Math.PI / 2, 0] , detail: "bearing"},
     influences: ["CRANKSHAFT"],
   },
   {
@@ -232,7 +232,7 @@ const ENGINE_001_COMPONENTS: ComponentNode[] = [
     subsystem: "LUBRICATION",
     description: "Pump, gallery, filter and cooler supplying pressurised oil to the bearings.",
     parent: "ENGINE",
-    geometry: { shape: "box", position: [0, -0.22, 0.02], size: [0.42, 0.13, 0.2] },
+    geometry: { shape: "box", position: [0, -0.22, 0.02], size: [0.42, 0.13, 0.2] , detail: "oil"},
     influences: ["BEARING_1", "BEARING_2", "CRANKSHAFT"],
   },
   {
@@ -241,7 +241,7 @@ const ENGINE_001_COMPONENTS: ComponentNode[] = [
     subsystem: "INDUCTION",
     description: "Fuel pump, metering unit and injectors / carburettor.",
     parent: "ENGINE",
-    geometry: { shape: "box", position: [-0.3, 0.08, -0.2], size: [0.2, 0.1, 0.1] },
+    geometry: { shape: "box", position: [-0.3, 0.08, -0.2], size: [0.2, 0.1, 0.1] , detail: "fuel"},
     influences: ["CYLINDER_ASSY"],
   },
   {
@@ -250,7 +250,7 @@ const ENGINE_001_COMPONENTS: ComponentNode[] = [
     subsystem: "THERMAL",
     description: "Cooling airflow ducting and baffles over the cylinder fins.",
     parent: "ENGINE",
-    geometry: { shape: "box", position: [0, 0.46, 0], size: [0.9, 0.05, 0.3] },
+    geometry: { shape: "box", position: [0, 0.46, 0], size: [0.9, 0.05, 0.3] , detail: "cooling"},
     influences: ["CYLINDER_ASSY"],
   },
   {
@@ -259,7 +259,7 @@ const ENGINE_001_COMPONENTS: ComponentNode[] = [
     subsystem: "INDUCTION",
     description: "Air filter, throttle body and inlet manifold runners.",
     parent: "ENGINE",
-    geometry: { shape: "cylinder", position: [0, 0.2, -0.22], size: [0.05, 0.05, 0.8], rotation: [0, 0, Math.PI / 2] },
+    geometry: { shape: "cylinder", position: [0, 0.2, -0.22], size: [0.05, 0.05, 0.8], rotation: [0, 0, Math.PI / 2] , detail: "intake"},
     influences: ["CYLINDER_ASSY"],
   },
   {
@@ -268,7 +268,7 @@ const ENGINE_001_COMPONENTS: ComponentNode[] = [
     subsystem: "THERMAL",
     description: "Exhaust headers and collector.",
     parent: "ENGINE",
-    geometry: { shape: "cylinder", position: [0, 0.16, 0.24], size: [0.045, 0.045, 0.8], rotation: [0, 0, Math.PI / 2] },
+    geometry: { shape: "cylinder", position: [0, 0.16, 0.24], size: [0.045, 0.045, 0.8], rotation: [0, 0, Math.PI / 2] , detail: "exhaust"},
     influences: [],
   },
   {
@@ -277,7 +277,7 @@ const ENGINE_001_COMPONENTS: ComponentNode[] = [
     subsystem: "MECHANICAL",
     description: "Dual ignition modules, coils and harness.",
     parent: "ENGINE",
-    geometry: { shape: "box", position: [0.34, 0.1, -0.2], size: [0.16, 0.1, 0.09] },
+    geometry: { shape: "box", position: [0.34, 0.1, -0.2], size: [0.16, 0.1, 0.09] , detail: "ignition"},
     influences: ["CYLINDER_ASSY"],
   },
   {
@@ -286,7 +286,7 @@ const ENGINE_001_COMPONENTS: ComponentNode[] = [
     subsystem: "MECHANICAL",
     description: "Output shaft / reduction drive to the propeller.",
     parent: "ENGINE",
-    geometry: { shape: "cylinder", position: [0.62, -0.05, 0], size: [0.05, 0.05, 0.3], rotation: [0, 0, Math.PI / 2] },
+    geometry: { shape: "cylinder", position: [0.62, -0.05, 0], size: [0.05, 0.05, 0.3], rotation: [0, 0, Math.PI / 2] , detail: "propshaft"},
     influences: [],
   },
 ];
