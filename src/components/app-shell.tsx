@@ -25,6 +25,10 @@ import {
   Radio,
   Route as RouteIcon,
   SlidersHorizontal,
+  ShieldCheck,
+  ScrollText,
+  Wrench,
+  ListChecks,
 } from "lucide-react";
 import type { ReactNode } from "react";
 import { useTelemetry } from "@/lib/sim/store";
@@ -50,6 +54,7 @@ const NAV: { group: string; items: { to: string; label: string; icon: typeof Gau
       { to: "/residuals", label: "Residual Analysis", icon: GitCompareArrows },
       { to: "/diagnosis", label: "Fault Diagnosis", icon: Stethoscope },
       { to: "/mission", label: "Mission Reliability", icon: ShieldAlert },
+      { to: "/maintenance", label: "Maintenance", icon: Wrench },
     ],
   },
   {
@@ -59,6 +64,7 @@ const NAV: { group: string; items: { to: string; label: string; icon: typeof Gau
       { to: "/simulation", label: "Simulation Lab", icon: TestTubeDiagonal },
       { to: "/validation", label: "Validation Center", icon: ClipboardCheck },
       { to: "/models", label: "Model Management", icon: Layers },
+      { to: "/traceability", label: "Traceability", icon: ListChecks },
     ],
   },
   {
@@ -67,6 +73,8 @@ const NAV: { group: string; items: { to: string; label: string; icon: typeof Gau
       { to: "/trace", label: "Trace Mode", icon: RouteIcon },
       { to: "/configuration", label: "Configuration", icon: SlidersHorizontal },
       { to: "/system", label: "System Health", icon: Cpu },
+      { to: "/cybersecurity", label: "Cybersecurity", icon: ShieldCheck },
+      { to: "/audit", label: "Audit Log", icon: ScrollText },
       { to: "/report", label: "Implementation Report", icon: FileText },
       { to: "/settings", label: "Settings", icon: SettingsIcon },
     ],

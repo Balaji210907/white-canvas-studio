@@ -10,11 +10,14 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuditRouteImport } from './routes/audit'
 import { Route as ConfigurationRouteImport } from './routes/configuration'
+import { Route as CybersecurityRouteImport } from './routes/cybersecurity'
 import { Route as DiagnosisRouteImport } from './routes/diagnosis'
 import { Route as HealthRouteImport } from './routes/health'
 import { Route as HistoryRouteImport } from './routes/history'
 import { Route as ImportRouteImport } from './routes/import'
+import { Route as MaintenanceRouteImport } from './routes/maintenance'
 import { Route as MissionRouteImport } from './routes/mission'
 import { Route as ModelsRouteImport } from './routes/models'
 import { Route as ReportRouteImport } from './routes/report'
@@ -25,6 +28,7 @@ import { Route as SourcesRouteImport } from './routes/sources'
 import { Route as SystemRouteImport } from './routes/system'
 import { Route as TelemetryRouteImport } from './routes/telemetry'
 import { Route as TraceRouteImport } from './routes/trace'
+import { Route as TraceabilityRouteImport } from './routes/traceability'
 import { Route as TwinRouteImport } from './routes/twin'
 import { Route as ValidationRouteImport } from './routes/validation'
 
@@ -33,9 +37,19 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuditRoute = AuditRouteImport.update({
+  id: '/audit',
+  path: '/audit',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ConfigurationRoute = ConfigurationRouteImport.update({
   id: '/configuration',
   path: '/configuration',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CybersecurityRoute = CybersecurityRouteImport.update({
+  id: '/cybersecurity',
+  path: '/cybersecurity',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DiagnosisRoute = DiagnosisRouteImport.update({
@@ -56,6 +70,11 @@ const HistoryRoute = HistoryRouteImport.update({
 const ImportRoute = ImportRouteImport.update({
   id: '/import',
   path: '/import',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MaintenanceRoute = MaintenanceRouteImport.update({
+  id: '/maintenance',
+  path: '/maintenance',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MissionRoute = MissionRouteImport.update({
@@ -108,6 +127,11 @@ const TraceRoute = TraceRouteImport.update({
   path: '/trace',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TraceabilityRoute = TraceabilityRouteImport.update({
+  id: '/traceability',
+  path: '/traceability',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TwinRoute = TwinRouteImport.update({
   id: '/twin',
   path: '/twin',
@@ -121,11 +145,14 @@ const ValidationRoute = ValidationRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/audit': typeof AuditRoute
   '/configuration': typeof ConfigurationRoute
+  '/cybersecurity': typeof CybersecurityRoute
   '/diagnosis': typeof DiagnosisRoute
   '/health': typeof HealthRoute
   '/history': typeof HistoryRoute
   '/import': typeof ImportRoute
+  '/maintenance': typeof MaintenanceRoute
   '/mission': typeof MissionRoute
   '/models': typeof ModelsRoute
   '/report': typeof ReportRoute
@@ -136,16 +163,20 @@ export interface FileRoutesByFullPath {
   '/system': typeof SystemRoute
   '/telemetry': typeof TelemetryRoute
   '/trace': typeof TraceRoute
+  '/traceability': typeof TraceabilityRoute
   '/twin': typeof TwinRoute
   '/validation': typeof ValidationRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/audit': typeof AuditRoute
   '/configuration': typeof ConfigurationRoute
+  '/cybersecurity': typeof CybersecurityRoute
   '/diagnosis': typeof DiagnosisRoute
   '/health': typeof HealthRoute
   '/history': typeof HistoryRoute
   '/import': typeof ImportRoute
+  '/maintenance': typeof MaintenanceRoute
   '/mission': typeof MissionRoute
   '/models': typeof ModelsRoute
   '/report': typeof ReportRoute
@@ -156,17 +187,21 @@ export interface FileRoutesByTo {
   '/system': typeof SystemRoute
   '/telemetry': typeof TelemetryRoute
   '/trace': typeof TraceRoute
+  '/traceability': typeof TraceabilityRoute
   '/twin': typeof TwinRoute
   '/validation': typeof ValidationRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/audit': typeof AuditRoute
   '/configuration': typeof ConfigurationRoute
+  '/cybersecurity': typeof CybersecurityRoute
   '/diagnosis': typeof DiagnosisRoute
   '/health': typeof HealthRoute
   '/history': typeof HistoryRoute
   '/import': typeof ImportRoute
+  '/maintenance': typeof MaintenanceRoute
   '/mission': typeof MissionRoute
   '/models': typeof ModelsRoute
   '/report': typeof ReportRoute
@@ -177,6 +212,7 @@ export interface FileRoutesById {
   '/system': typeof SystemRoute
   '/telemetry': typeof TelemetryRoute
   '/trace': typeof TraceRoute
+  '/traceability': typeof TraceabilityRoute
   '/twin': typeof TwinRoute
   '/validation': typeof ValidationRoute
 }
@@ -184,11 +220,14 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/audit'
     | '/configuration'
+    | '/cybersecurity'
     | '/diagnosis'
     | '/health'
     | '/history'
     | '/import'
+    | '/maintenance'
     | '/mission'
     | '/models'
     | '/report'
@@ -199,16 +238,20 @@ export interface FileRouteTypes {
     | '/system'
     | '/telemetry'
     | '/trace'
+    | '/traceability'
     | '/twin'
     | '/validation'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/audit'
     | '/configuration'
+    | '/cybersecurity'
     | '/diagnosis'
     | '/health'
     | '/history'
     | '/import'
+    | '/maintenance'
     | '/mission'
     | '/models'
     | '/report'
@@ -219,16 +262,20 @@ export interface FileRouteTypes {
     | '/system'
     | '/telemetry'
     | '/trace'
+    | '/traceability'
     | '/twin'
     | '/validation'
   id:
     | '__root__'
     | '/'
+    | '/audit'
     | '/configuration'
+    | '/cybersecurity'
     | '/diagnosis'
     | '/health'
     | '/history'
     | '/import'
+    | '/maintenance'
     | '/mission'
     | '/models'
     | '/report'
@@ -239,17 +286,21 @@ export interface FileRouteTypes {
     | '/system'
     | '/telemetry'
     | '/trace'
+    | '/traceability'
     | '/twin'
     | '/validation'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuditRoute: typeof AuditRoute
   ConfigurationRoute: typeof ConfigurationRoute
+  CybersecurityRoute: typeof CybersecurityRoute
   DiagnosisRoute: typeof DiagnosisRoute
   HealthRoute: typeof HealthRoute
   HistoryRoute: typeof HistoryRoute
   ImportRoute: typeof ImportRoute
+  MaintenanceRoute: typeof MaintenanceRoute
   MissionRoute: typeof MissionRoute
   ModelsRoute: typeof ModelsRoute
   ReportRoute: typeof ReportRoute
@@ -260,6 +311,7 @@ export interface RootRouteChildren {
   SystemRoute: typeof SystemRoute
   TelemetryRoute: typeof TelemetryRoute
   TraceRoute: typeof TraceRoute
+  TraceabilityRoute: typeof TraceabilityRoute
   TwinRoute: typeof TwinRoute
   ValidationRoute: typeof ValidationRoute
 }
@@ -273,11 +325,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/audit': {
+      id: '/audit'
+      path: '/audit'
+      fullPath: '/audit'
+      preLoaderRoute: typeof AuditRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/configuration': {
       id: '/configuration'
       path: '/configuration'
       fullPath: '/configuration'
       preLoaderRoute: typeof ConfigurationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cybersecurity': {
+      id: '/cybersecurity'
+      path: '/cybersecurity'
+      fullPath: '/cybersecurity'
+      preLoaderRoute: typeof CybersecurityRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/diagnosis': {
@@ -306,6 +372,13 @@ declare module '@tanstack/react-router' {
       path: '/import'
       fullPath: '/import'
       preLoaderRoute: typeof ImportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/maintenance': {
+      id: '/maintenance'
+      path: '/maintenance'
+      fullPath: '/maintenance'
+      preLoaderRoute: typeof MaintenanceRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/mission': {
@@ -378,6 +451,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TraceRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/traceability': {
+      id: '/traceability'
+      path: '/traceability'
+      fullPath: '/traceability'
+      preLoaderRoute: typeof TraceabilityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/twin': {
       id: '/twin'
       path: '/twin'
@@ -397,11 +477,14 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuditRoute: AuditRoute,
   ConfigurationRoute: ConfigurationRoute,
+  CybersecurityRoute: CybersecurityRoute,
   DiagnosisRoute: DiagnosisRoute,
   HealthRoute: HealthRoute,
   HistoryRoute: HistoryRoute,
   ImportRoute: ImportRoute,
+  MaintenanceRoute: MaintenanceRoute,
   MissionRoute: MissionRoute,
   ModelsRoute: ModelsRoute,
   ReportRoute: ReportRoute,
@@ -412,6 +495,7 @@ const rootRouteChildren: RootRouteChildren = {
   SystemRoute: SystemRoute,
   TelemetryRoute: TelemetryRoute,
   TraceRoute: TraceRoute,
+  TraceabilityRoute: TraceabilityRoute,
   TwinRoute: TwinRoute,
   ValidationRoute: ValidationRoute,
 }
