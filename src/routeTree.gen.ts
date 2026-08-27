@@ -14,6 +14,7 @@ import { Route as ConfigurationRouteImport } from './routes/configuration'
 import { Route as DiagnosisRouteImport } from './routes/diagnosis'
 import { Route as HealthRouteImport } from './routes/health'
 import { Route as HistoryRouteImport } from './routes/history'
+import { Route as ImportRouteImport } from './routes/import'
 import { Route as MissionRouteImport } from './routes/mission'
 import { Route as ModelsRouteImport } from './routes/models'
 import { Route as ResidualsRouteImport } from './routes/residuals'
@@ -49,6 +50,11 @@ const HealthRoute = HealthRouteImport.update({
 const HistoryRoute = HistoryRouteImport.update({
   id: '/history',
   path: '/history',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ImportRoute = ImportRouteImport.update({
+  id: '/import',
+  path: '/import',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MissionRoute = MissionRouteImport.update({
@@ -113,6 +119,7 @@ export interface FileRoutesByFullPath {
   '/diagnosis': typeof DiagnosisRoute
   '/health': typeof HealthRoute
   '/history': typeof HistoryRoute
+  '/import': typeof ImportRoute
   '/mission': typeof MissionRoute
   '/models': typeof ModelsRoute
   '/residuals': typeof ResidualsRoute
@@ -131,6 +138,7 @@ export interface FileRoutesByTo {
   '/diagnosis': typeof DiagnosisRoute
   '/health': typeof HealthRoute
   '/history': typeof HistoryRoute
+  '/import': typeof ImportRoute
   '/mission': typeof MissionRoute
   '/models': typeof ModelsRoute
   '/residuals': typeof ResidualsRoute
@@ -150,6 +158,7 @@ export interface FileRoutesById {
   '/diagnosis': typeof DiagnosisRoute
   '/health': typeof HealthRoute
   '/history': typeof HistoryRoute
+  '/import': typeof ImportRoute
   '/mission': typeof MissionRoute
   '/models': typeof ModelsRoute
   '/residuals': typeof ResidualsRoute
@@ -170,6 +179,7 @@ export interface FileRouteTypes {
     | '/diagnosis'
     | '/health'
     | '/history'
+    | '/import'
     | '/mission'
     | '/models'
     | '/residuals'
@@ -188,6 +198,7 @@ export interface FileRouteTypes {
     | '/diagnosis'
     | '/health'
     | '/history'
+    | '/import'
     | '/mission'
     | '/models'
     | '/residuals'
@@ -206,6 +217,7 @@ export interface FileRouteTypes {
     | '/diagnosis'
     | '/health'
     | '/history'
+    | '/import'
     | '/mission'
     | '/models'
     | '/residuals'
@@ -225,6 +237,7 @@ export interface RootRouteChildren {
   DiagnosisRoute: typeof DiagnosisRoute
   HealthRoute: typeof HealthRoute
   HistoryRoute: typeof HistoryRoute
+  ImportRoute: typeof ImportRoute
   MissionRoute: typeof MissionRoute
   ModelsRoute: typeof ModelsRoute
   ResidualsRoute: typeof ResidualsRoute
@@ -273,6 +286,13 @@ declare module '@tanstack/react-router' {
       path: '/history'
       fullPath: '/history'
       preLoaderRoute: typeof HistoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/import': {
+      id: '/import'
+      path: '/import'
+      fullPath: '/import'
+      preLoaderRoute: typeof ImportRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/mission': {
@@ -361,6 +381,7 @@ const rootRouteChildren: RootRouteChildren = {
   DiagnosisRoute: DiagnosisRoute,
   HealthRoute: HealthRoute,
   HistoryRoute: HistoryRoute,
+  ImportRoute: ImportRoute,
   MissionRoute: MissionRoute,
   ModelsRoute: ModelsRoute,
   ResidualsRoute: ResidualsRoute,
