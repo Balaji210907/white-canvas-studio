@@ -18,6 +18,9 @@ import {
   Stethoscope,
   TestTubeDiagonal,
   ClipboardCheck,
+  Radio,
+  Route as RouteIcon,
+  SlidersHorizontal,
 } from "lucide-react";
 import type { ReactNode } from "react";
 import { useTelemetry } from "@/lib/sim/store";
@@ -32,6 +35,7 @@ const NAV: { group: string; items: { to: string; label: string; icon: typeof Gau
       { to: "/", label: "Command Center", icon: LayoutDashboard },
       { to: "/telemetry", label: "Live Telemetry", icon: Activity },
       { to: "/twin", label: "Digital Twin", icon: GitCompareArrows },
+      { to: "/sources", label: "Data Sources", icon: Radio },
     ],
   },
   {
@@ -54,6 +58,8 @@ const NAV: { group: string; items: { to: string; label: string; icon: typeof Gau
   {
     group: "Platform",
     items: [
+      { to: "/trace", label: "Trace Mode", icon: RouteIcon },
+      { to: "/configuration", label: "Configuration", icon: SlidersHorizontal },
       { to: "/system", label: "System Health", icon: Cpu },
       { to: "/settings", label: "Settings", icon: SettingsIcon },
     ],
