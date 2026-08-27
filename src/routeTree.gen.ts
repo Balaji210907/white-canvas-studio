@@ -16,13 +16,13 @@ import { Route as HealthRouteImport } from './routes/health'
 import { Route as HistoryRouteImport } from './routes/history'
 import { Route as MissionRouteImport } from './routes/mission'
 import { Route as ModelsRouteImport } from './routes/models'
+import { Route as ResidualsRouteImport } from './routes/residuals'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SimulationRouteImport } from './routes/simulation'
 import { Route as SourcesRouteImport } from './routes/sources'
 import { Route as SystemRouteImport } from './routes/system'
 import { Route as TelemetryRouteImport } from './routes/telemetry'
 import { Route as TraceRouteImport } from './routes/trace'
-import { Route as TwinRouteImport } from './routes/twin'
 import { Route as ValidationRouteImport } from './routes/validation'
 
 const IndexRoute = IndexRouteImport.update({
@@ -60,6 +60,11 @@ const ModelsRoute = ModelsRouteImport.update({
   path: '/models',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResidualsRoute = ResidualsRouteImport.update({
+  id: '/residuals',
+  path: '/residuals',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -90,11 +95,6 @@ const TraceRoute = TraceRouteImport.update({
   path: '/trace',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TwinRoute = TwinRouteImport.update({
-  id: '/twin',
-  path: '/twin',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ValidationRoute = ValidationRouteImport.update({
   id: '/validation',
   path: '/validation',
@@ -109,13 +109,13 @@ export interface FileRoutesByFullPath {
   '/history': typeof HistoryRoute
   '/mission': typeof MissionRoute
   '/models': typeof ModelsRoute
+  '/residuals': typeof ResidualsRoute
   '/settings': typeof SettingsRoute
   '/simulation': typeof SimulationRoute
   '/sources': typeof SourcesRoute
   '/system': typeof SystemRoute
   '/telemetry': typeof TelemetryRoute
   '/trace': typeof TraceRoute
-  '/twin': typeof TwinRoute
   '/validation': typeof ValidationRoute
 }
 export interface FileRoutesByTo {
@@ -126,13 +126,13 @@ export interface FileRoutesByTo {
   '/history': typeof HistoryRoute
   '/mission': typeof MissionRoute
   '/models': typeof ModelsRoute
+  '/residuals': typeof ResidualsRoute
   '/settings': typeof SettingsRoute
   '/simulation': typeof SimulationRoute
   '/sources': typeof SourcesRoute
   '/system': typeof SystemRoute
   '/telemetry': typeof TelemetryRoute
   '/trace': typeof TraceRoute
-  '/twin': typeof TwinRoute
   '/validation': typeof ValidationRoute
 }
 export interface FileRoutesById {
@@ -144,13 +144,13 @@ export interface FileRoutesById {
   '/history': typeof HistoryRoute
   '/mission': typeof MissionRoute
   '/models': typeof ModelsRoute
+  '/residuals': typeof ResidualsRoute
   '/settings': typeof SettingsRoute
   '/simulation': typeof SimulationRoute
   '/sources': typeof SourcesRoute
   '/system': typeof SystemRoute
   '/telemetry': typeof TelemetryRoute
   '/trace': typeof TraceRoute
-  '/twin': typeof TwinRoute
   '/validation': typeof ValidationRoute
 }
 export interface FileRouteTypes {
@@ -163,13 +163,13 @@ export interface FileRouteTypes {
     | '/history'
     | '/mission'
     | '/models'
+    | '/residuals'
     | '/settings'
     | '/simulation'
     | '/sources'
     | '/system'
     | '/telemetry'
     | '/trace'
-    | '/twin'
     | '/validation'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -180,13 +180,13 @@ export interface FileRouteTypes {
     | '/history'
     | '/mission'
     | '/models'
+    | '/residuals'
     | '/settings'
     | '/simulation'
     | '/sources'
     | '/system'
     | '/telemetry'
     | '/trace'
-    | '/twin'
     | '/validation'
   id:
     | '__root__'
@@ -197,13 +197,13 @@ export interface FileRouteTypes {
     | '/history'
     | '/mission'
     | '/models'
+    | '/residuals'
     | '/settings'
     | '/simulation'
     | '/sources'
     | '/system'
     | '/telemetry'
     | '/trace'
-    | '/twin'
     | '/validation'
   fileRoutesById: FileRoutesById
 }
@@ -215,13 +215,13 @@ export interface RootRouteChildren {
   HistoryRoute: typeof HistoryRoute
   MissionRoute: typeof MissionRoute
   ModelsRoute: typeof ModelsRoute
+  ResidualsRoute: typeof ResidualsRoute
   SettingsRoute: typeof SettingsRoute
   SimulationRoute: typeof SimulationRoute
   SourcesRoute: typeof SourcesRoute
   SystemRoute: typeof SystemRoute
   TelemetryRoute: typeof TelemetryRoute
   TraceRoute: typeof TraceRoute
-  TwinRoute: typeof TwinRoute
   ValidationRoute: typeof ValidationRoute
 }
 
@@ -276,6 +276,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ModelsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/residuals': {
+      id: '/residuals'
+      path: '/residuals'
+      fullPath: '/residuals'
+      preLoaderRoute: typeof ResidualsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/settings': {
       id: '/settings'
       path: '/settings'
@@ -318,13 +325,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TraceRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/twin': {
-      id: '/twin'
-      path: '/twin'
-      fullPath: '/twin'
-      preLoaderRoute: typeof TwinRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/validation': {
       id: '/validation'
       path: '/validation'
@@ -343,13 +343,13 @@ const rootRouteChildren: RootRouteChildren = {
   HistoryRoute: HistoryRoute,
   MissionRoute: MissionRoute,
   ModelsRoute: ModelsRoute,
+  ResidualsRoute: ResidualsRoute,
   SettingsRoute: SettingsRoute,
   SimulationRoute: SimulationRoute,
   SourcesRoute: SourcesRoute,
   SystemRoute: SystemRoute,
   TelemetryRoute: TelemetryRoute,
   TraceRoute: TraceRoute,
-  TwinRoute: TwinRoute,
   ValidationRoute: ValidationRoute,
 }
 export const routeTree = rootRouteImport
