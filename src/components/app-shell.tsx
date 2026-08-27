@@ -34,14 +34,16 @@ const NAV: { group: string; items: { to: string; label: string; icon: typeof Gau
     items: [
       { to: "/", label: "Command Center", icon: LayoutDashboard },
       { to: "/telemetry", label: "Live Telemetry", icon: Activity },
-      { to: "/twin", label: "Digital Twin", icon: GitCompareArrows },
+      { to: "/twin", label: "Digital Twin", icon: Boxes },
       { to: "/sources", label: "Data Sources", icon: Radio },
+      { to: "/import", label: "Import & Replay", icon: Upload },
     ],
   },
   {
     group: "Prognostics",
     items: [
       { to: "/health", label: "Health & PHM", icon: Gauge },
+      { to: "/residuals", label: "Residual Analysis", icon: GitCompareArrows },
       { to: "/diagnosis", label: "Fault Diagnosis", icon: Stethoscope },
       { to: "/mission", label: "Mission Reliability", icon: ShieldAlert },
     ],
@@ -52,7 +54,7 @@ const NAV: { group: string; items: { to: string; label: string; icon: typeof Gau
       { to: "/history", label: "Historical Analysis", icon: History },
       { to: "/simulation", label: "Simulation Lab", icon: TestTubeDiagonal },
       { to: "/validation", label: "Validation Center", icon: ClipboardCheck },
-      { to: "/models", label: "Model Management", icon: Boxes },
+      { to: "/models", label: "Model Management", icon: Layers },
     ],
   },
   {
@@ -61,10 +63,12 @@ const NAV: { group: string; items: { to: string; label: string; icon: typeof Gau
       { to: "/trace", label: "Trace Mode", icon: RouteIcon },
       { to: "/configuration", label: "Configuration", icon: SlidersHorizontal },
       { to: "/system", label: "System Health", icon: Cpu },
+      { to: "/report", label: "Implementation Report", icon: FileText },
       { to: "/settings", label: "Settings", icon: SettingsIcon },
     ],
   },
 ];
+
 
 function Clock({ t }: { t: number | null }) {
   // Rendered only after hydration: a live clock cannot match the SSR snapshot.
