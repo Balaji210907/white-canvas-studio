@@ -18,6 +18,12 @@ import {
 import { ENGINE_001, getProfile, type EngineProfile } from "@/lib/engine/profile";
 import { computeTwinState, emptyTwinState, type TwinState } from "@/lib/twin/state";
 import { ReplayRunner, type ReplayDataset } from "@/lib/telemetry/replay";
+import {
+  TelemetryIntegrityMonitor,
+  emptySnapshot,
+  type IntegritySnapshot,
+} from "@/lib/security/integrity";
+import { logAudit } from "@/lib/security/audit";
 
 const HISTORY = 240;
 
@@ -56,6 +62,10 @@ export interface TelemetryState {
   clearDataset: () => void;
   seekReplay: (i: number) => void;
   useSimulator: () => void;
+
+  /* Telemetry integrity */
+  integrity: IntegritySnapshot;
+  integrityMonitor: TelemetryIntegrityMonitor;
 }
 
 const Ctx = createContext<TelemetryState | null>(null);
@@ -84,6 +94,10 @@ export function TelemetryProvider({ children }: { children: ReactNode }) {
   const profile = useMemo(() => getProfile(engineId), [engineId]);
   const [twinState, setTwinState] = useState<TwinState>(() => emptyTwinState(getProfile(ENGINE_001.engineId)));
 
+  const [integrity, setIntegrity] = useState<IntegritySnapshot>(() => emptySnapshot());
+  const monitorRef = useRef<TelemetryIntegrityMonitor | null>(null);
+  if (!monitorRef.current) monitorRef.current = new TelemetryIntegrityMonitor();
+
   const simRef = useRef<TwinSimulator | null>(null);
   const replayRef = useRef<ReplayRunner | null>(null);
   const twinRef = useRef<TwinState | null>(null);
@@ -103,6 +117,9 @@ export function TelemetryProvider({ children }: { children: ReactNode }) {
   const resetRun = useCallback(() => {
     simRef.current?.reset();
     replayRef.current?.reset();
+    monitorRef.current?.reset();
+    setIntegrity(emptySnapshot());
+    logAudit({ category: "SESSION", action: "RUN_RESET", resource: `engine:${engineId}`, detail: "Telemetry history, twin state and integrity ledger cleared." });
     framesRef.current = 0;
     twinRef.current = null;
     setSamples([]);
@@ -133,7 +150,15 @@ export function TelemetryProvider({ children }: { children: ReactNode }) {
     setSamples([]);
     setReplayPosition(0);
     setTwinState(emptyTwinState(getProfile(d.engineId)));
+    monitorRef.current?.reset();
+    setIntegrity(emptySnapshot());
     setRunning(true);
+    logAudit({
+      category: "DATA",
+      action: "DATASET_LOADED",
+      resource: `dataset:${d.name ?? d.engineId}`,
+      detail: `${d.frames.length} frames mapped to engine ${d.engineId}; source marked REPLAY.`,
+    });
   }, []);
 
   const clearDataset = useCallback(() => {
@@ -153,6 +178,7 @@ export function TelemetryProvider({ children }: { children: ReactNode }) {
 
   const seekReplay = useCallback((i: number) => {
     replayRef.current?.seek(i);
+    logAudit({ category: "REPLAY", action: "SEEK", resource: "replay-session", detail: `Playhead moved to frame ${i}.` });
     setReplayPosition(i);
     twinRef.current = null;
     setSamples([]);
@@ -178,6 +204,20 @@ export function TelemetryProvider({ children }: { children: ReactNode }) {
       if (!s) return;
 
       framesRef.current += 1;
+      const findings = monitorRef.current!.check(s);
+      setIntegrity(monitorRef.current!.snapshot);
+      for (const f of findings) {
+        if (f.severity === "CRITICAL") {
+          logAudit({
+            actor: "telemetry-ingest",
+            category: "INTEGRITY",
+            action: f.check,
+            resource: `frame:${f.seq}`,
+            result: "DETECTED",
+            detail: `${f.title} — ${f.evidence}`,
+          });
+        }
+      }
       const next = computeTwinState({
         profile: getProfile(engineId),
         result: s,
@@ -229,6 +269,16 @@ export function TelemetryProvider({ children }: { children: ReactNode }) {
           });
         }
       }
+      for (const f of findings) {
+        newAlerts.push({
+          id: `int-${f.id}`,
+          t: f.t,
+          severity: f.severity === "CRITICAL" ? "CRITICAL" : "WARNING",
+          source: "DATA",
+          title: `Integrity: ${f.title}`,
+          detail: f.evidence,
+        });
+      }
       if (newAlerts.length) setAlerts((prev) => [...newAlerts, ...prev].slice(0, 120));
     }, interval);
     return () => clearInterval(id);
@@ -264,6 +314,8 @@ export function TelemetryProvider({ children }: { children: ReactNode }) {
       clearDataset,
       seekReplay,
       useSimulator,
+      integrity,
+      integrityMonitor: monitorRef.current!,
     }),
     [
       samples,
@@ -287,6 +339,7 @@ export function TelemetryProvider({ children }: { children: ReactNode }) {
       clearDataset,
       seekReplay,
       useSimulator,
+      integrity,
     ],
   );
 
