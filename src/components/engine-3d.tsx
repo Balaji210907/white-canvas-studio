@@ -246,10 +246,19 @@ export default function Engine3D({
   return (
     <Canvas camera={{ position: [1.5, 0.9, 1.6], fov: 40 }} dpr={[1, 1.75]} shadows={false}>
       <color attach="background" args={["#f4f6f8"]} />
-      <ambientLight intensity={0.75} />
-      <directionalLight position={[3, 5, 2]} intensity={1.1} />
+      <hemisphereLight args={["#ffffff", "#c8ced4", 0.55]} />
+      <ambientLight intensity={0.45} />
+      <directionalLight position={[3, 5, 2]} intensity={1.05} />
       <directionalLight position={[-3, 2, -2]} intensity={0.35} />
+      <directionalLight position={[0, -2, 3]} intensity={0.2} />
       <Suspense fallback={null}>
+        {/* Local light probe — gives metal parts something to reflect. No CDN HDR. */}
+        <Environment resolution={128}>
+          <Lightformer intensity={1.6} position={[0, 3, 0]} scale={[6, 6, 1]} />
+          <Lightformer intensity={0.7} color="#dfe6ec" position={[-4, 1, 1]} rotation-y={Math.PI / 2} scale={[8, 3, 1]} />
+          <Lightformer intensity={0.5} color="#c9d3db" position={[4, 1, -1]} rotation-y={-Math.PI / 2} scale={[8, 3, 1]} />
+        </Environment>
+
         <group onPointerMissed={() => onSelect(null)}>
           {meshes.map((c) => {
             const cs = state.components[c.id];
