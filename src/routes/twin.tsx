@@ -1,206 +1,592 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useTelemetry } from "@/lib/sim/store";
-import { SENSOR_SPECS } from "@/lib/sim/engine";
-import { Bar, Metric, Panel, PageHeader, ProvenanceTag, PrototypeNotice } from "@/components/ui-kit";
+import { Suspense, lazy, useEffect, useMemo, useState } from "react";
+import {
+  Boxes,
+  Crosshair,
+  EyeOff,
+  Layers,
+  RotateCcw,
+  Scissors,
+  Search,
+  Signal as SignalIcon,
+} from "lucide-react";
+
+import { PageHeader, Panel, StatusPill, PrototypeNotice, Bar, type Tone } from "@/components/ui-kit";
 import { TrendChart } from "@/components/charts";
+import { useTelemetry } from "@/lib/sim/store";
+import { SENSOR_MAP } from "@/lib/config/registry";
+import {
+  ENGINE_PROFILES,
+  buildTree,
+  flattenTree,
+  mappingCoverage,
+  sensorsForComponent,
+} from "@/lib/engine/profile";
+import {
+  COMPONENT_STATUS_TONE,
+  reasoningPath,
+  type ComponentState,
+} from "@/lib/twin/state";
+import type { ViewerOptions } from "@/components/engine-3d";
+
+const Engine3D = lazy(() => import("@/components/engine-3d"));
 
 export const Route = createFileRoute("/twin")({
   head: () => ({
     meta: [
-      { title: "Digital Twin — AERO-TWIN AI" },
+      { title: "Digital Twin Workspace — AERO-TWIN AI" },
       {
         name: "description",
         content:
-          "Physics-informed digital twin state, actual-vs-expected residual analysis and twin confidence for the simulated aero piston engine.",
+          "Engine-centric 3D digital twin: component hierarchy, state-driven 3D representation, component inspection, sensor overlay and synchronisation monitor.",
       },
-      { property: "og:title", content: "Digital Twin — AERO-TWIN AI" },
+      { property: "og:title", content: "Digital Twin Workspace — AERO-TWIN AI" },
       {
         property: "og:description",
-        content: "Actual vs expected engine state with residual decomposition and twin confidence.",
+        content:
+          "Component-level digital twin of an aero piston engine, synchronised to validated telemetry.",
       },
     ],
   }),
-  component: TwinPage,
+  component: TwinWorkspace,
 });
 
-const clockOf = (t: number) => new Date(t).toISOString().slice(14, 19);
+const fmt = (v: number | null | undefined, d = 1) =>
+  v === null || v === undefined ? "—" : v.toFixed(d);
 
-const MODEL_BLOCKS = [
-  {
-    name: "Volumetric induction model",
-    outputs: "Manifold pressure, air mass flow",
-    basis: "Speed-density relation with ambient pressure correction",
-  },
-  {
-    name: "Thermodynamic cylinder model",
-    outputs: "Cylinder head temperature",
-    basis: "Load-proportional heat release with convective rejection term",
-  },
-  {
-    name: "Lubrication circuit model",
-    outputs: "Oil pressure, oil temperature",
-    basis: "Pump characteristic vs speed with viscosity-temperature coupling",
-  },
-  {
-    name: "Rotordynamic model",
-    outputs: "Vibration RMS",
-    basis: "Speed-dependent baseline plus imbalance sensitivity term",
-  },
-];
+function StatusDot({ status }: { status: ComponentState["status"] }) {
+  const tone = COMPONENT_STATUS_TONE[status];
+  const cls: Record<string, string> = {
+    ok: "bg-ok",
+    warn: "bg-warn",
+    crit: "bg-crit",
+    info: "bg-info",
+    neutral: "bg-muted-foreground/50",
+  };
+  return <span className={`size-2 shrink-0 rounded-full ${cls[tone]}`} />;
+}
 
-function TwinPage() {
-  const { samples, latest } = useTelemetry();
-  if (!latest) return <div className="panel p-8 text-sm text-muted-foreground">Twin initialising…</div>;
+function TwinWorkspace() {
+  const {
+    profile,
+    engineId,
+    setEngineId,
+    twinState,
+    selectedComponent,
+    selectComponent,
+    samples,
+    source,
+    dataset,
+    running,
+  } = useTelemetry();
 
-  const window = samples.slice(-120);
-  const residualSeries = window.map((s) => ({
-    x: clockOf(s.t),
-    rpm: +s.twin.rpm.normResidual.toFixed(3),
-    engTemp: +s.twin.engTemp.normResidual.toFixed(3),
-    oilPress: +s.twin.oilPress.normResidual.toFixed(3),
-    vib: +s.twin.vib.normResidual.toFixed(3),
-  }));
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
-  const confSeries = window.map((s) => ({
-    x: clockOf(s.t),
-    twin: +(s.twinConfidence * 100).toFixed(1),
-    quality: +(s.dataQuality * 100).toFixed(1),
-  }));
+  const [query, setQuery] = useState("");
+  const [resetToken, setResetToken] = useState(0);
+  const [options, setOptions] = useState<ViewerOptions>({
+    exploded: 0,
+    isolate: false,
+    hidden: [],
+    showSensors: true,
+    section: false,
+    overlay: "status",
+  });
 
-  const worst = SENSOR_SPECS.map((s) => ({ s, n: Math.abs(latest.twin[s.id].normResidual) }))
-    .sort((a, b) => b.n - a.n)[0]!;
+  const tree = useMemo(() => buildTree(profile), [profile]);
+  const nodes = useMemo(() => flattenTree(tree), [tree]);
+  const filtered = useMemo(
+    () =>
+      query.trim()
+        ? nodes.filter(
+            (n) =>
+              n.name.toLowerCase().includes(query.toLowerCase()) ||
+              n.id.toLowerCase().includes(query.toLowerCase()),
+          )
+        : nodes,
+    [nodes, query],
+  );
+
+  const coverage = useMemo(() => mappingCoverage(profile), [profile]);
+  const selected = selectedComponent ? twinState.components[selectedComponent] ?? null : null;
+  const sync = twinState.sync;
+
+  const trendChannels = useMemo(() => {
+    if (!selected) return [];
+    return sensorsForComponent(profile, selected.id).map((x) => x.sensor.channel);
+  }, [profile, selected]);
+
+  const trendData = useMemo(() => {
+    const w = samples.slice(-90);
+    return w.map((s) => {
+      const row: Record<string, string | number> = {
+        x: new Date(s.t).toISOString().slice(14, 19),
+      };
+      for (const ch of trendChannels) {
+        const v = s.readings[ch]?.value;
+        if (v !== null && v !== undefined) row[ch] = +v.toFixed(2);
+      }
+      return row;
+    });
+  }, [samples, trendChannels]);
+
+  const events = useMemo(
+    () =>
+      samples
+        .slice(-120)
+        .filter((s) => s.status !== "NORMAL")
+        .slice(-8)
+        .reverse(),
+    [samples],
+  );
+
+  const provenanceTone: Tone = twinState.isRealEngineData ? "ok" : "info";
 
   return (
-    <>
+    <div className="space-y-4">
       <PageHeader
-        title="Digital Twin"
-        description="A physics-informed model of the engine runs alongside the live stream. Residuals are the difference between measured behaviour and the twin's expected behaviour under the same operating conditions."
+        title="Digital Twin Workspace"
+        description="The Digital Twin is the synchronised engineering state of one engine asset. The 3D scene is a representation of that state — never the other way round."
+        actions={
+          <div className="flex flex-wrap items-center gap-2">
+            <select
+              value={engineId}
+              onChange={(e) => setEngineId(e.target.value)}
+              className="rounded-md border border-border bg-card px-2 py-1.5 text-xs font-medium"
+            >
+              {ENGINE_PROFILES.map((p) => (
+                <option key={p.engineId} value={p.engineId}>
+                  {p.engineId} — {p.model}
+                </option>
+              ))}
+            </select>
+            <StatusPill tone={provenanceTone}>
+              {source === "REPLAY" ? "REPLAY" : "SIMULATED"}
+            </StatusPill>
+            <StatusPill tone={twinState.synchronised && running ? "ok" : "neutral"}>
+              {twinState.synchronised ? (running ? "SYNCHRONISED" : "PAUSED") : "WAITING FOR DATA"}
+            </StatusPill>
+          </div>
+        }
       />
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <Metric
-          label="Twin confidence"
-          value={(latest.twinConfidence * 100).toFixed(0)}
-          unit="%"
-          tone={latest.twinConfidence > 0.75 ? "ok" : "warn"}
-          provenance="model"
-          hint="Reduced by poor data quality and thermal transients"
-        />
-        <Metric
-          label="Fused residual magnitude"
-          value={(latest.anomalyScore * 6).toFixed(2)}
-          unit="σ"
-          tone={latest.anomalyScore > 0.35 ? "crit" : latest.anomalyScore > 0.18 ? "warn" : "ok"}
-          provenance="calculated"
-        />
-        <Metric
-          label="Dominant deviation"
-          value={worst.s.label}
-          tone={worst.n > 2 ? "crit" : worst.n > 1 ? "warn" : "ok"}
-          provenance="calculated"
-          hint={`${worst.n.toFixed(2)} σ normalised`}
-        />
-        <Metric
-          label="Twin update rate"
-          value="1.0"
-          unit="Hz"
-          provenance="model"
-          hint="Synchronised to the slowest validated channel"
-        />
+      {/* Identity + synchronisation strip */}
+      <div className="grid gap-3 rounded-lg border border-border bg-card p-3 text-xs md:grid-cols-3 xl:grid-cols-6">
+        {[
+          { k: "Engine ID", v: profile.engineId },
+          { k: "Model / configuration", v: `${profile.model} · ${profile.configuration}` },
+          { k: "Data source", v: dataset ? `${dataset.fileName} (replay)` : "Physics simulator" },
+          { k: "Twin model", v: `${profile.twinModelVersion} · ${profile.calibrationVersion}` },
+          { k: "Sensor map", v: profile.sensorMapVersion },
+          {
+            k: "3D asset",
+            v:
+              profile.asset3d.fidelity === "UNAVAILABLE"
+                ? "NOT AVAILABLE"
+                : `${profile.asset3d.format} · ${profile.asset3d.fidelity.replace("_", " ")}`,
+          },
+        ].map((x) => (
+          <div key={x.k}>
+            <div className="label-xs">{x.k}</div>
+            <div className="mono-num truncate text-foreground" title={x.v}>
+              {x.v}
+            </div>
+          </div>
+        ))}
       </div>
 
-      <Panel title="Actual vs expected state" subtitle="Per-parameter twin comparison" bodyClassName="p-0">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-surface text-left">
-              <tr className="label-xs">
-                <th className="px-4 py-2 font-semibold">Parameter</th>
-                <th className="px-4 py-2 font-semibold">Actual</th>
-                <th className="px-4 py-2 font-semibold">Twin expected</th>
-                <th className="px-4 py-2 font-semibold">Residual</th>
-                <th className="px-4 py-2 font-semibold">Normalised</th>
-                <th className="px-4 py-2 font-semibold">Deviation</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {SENSOR_SPECS.map((s) => {
-                const tw = latest.twin[s.id];
-                const r = latest.readings[s.id];
-                const n = Math.abs(tw.normResidual);
-                const tone = n > 2 ? "crit" : n > 1 ? "warn" : "ok";
-                return (
-                  <tr key={s.id} className="hover:bg-surface">
-                    <td className="px-4 py-2 font-medium">
-                      {s.label} <span className="text-xs text-muted-foreground">({s.unit})</span>
-                    </td>
-                    <td className="mono-num px-4 py-2">
-                      {r.value === null ? "—" : r.value.toFixed(s.precision)}
-                    </td>
-                    <td className="mono-num px-4 py-2 text-muted-foreground">
-                      {tw.expected.toFixed(s.precision)}
-                    </td>
-                    <td className="mono-num px-4 py-2">
-                      {tw.residual >= 0 ? "+" : ""}
-                      {tw.residual.toFixed(s.precision)}
-                    </td>
-                    <td className="mono-num px-4 py-2">{tw.normResidual.toFixed(2)} σ</td>
-                    <td className="w-40 px-4 py-2">
-                      <Bar value={Math.min(1, n / 4)} tone={tone} />
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </Panel>
+      <div className="grid gap-4 xl:grid-cols-[260px_minmax(0,1fr)_320px]">
+        {/* LEFT — component tree */}
+        <Panel title="Component tree" subtitle={`${nodes.length} declared components`} bodyClassName="p-0">
+          <div className="border-b border-border p-2">
+            <div className="flex items-center gap-1.5 rounded-md border border-border px-2 py-1">
+              <Search className="size-3.5 text-muted-foreground" />
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search components"
+                className="w-full bg-transparent text-xs outline-none"
+              />
+            </div>
+          </div>
+          <ul className="max-h-[430px] overflow-y-auto py-1 text-xs">
+            {filtered.map((n) => {
+              const st = twinState.components[n.id];
+              const active = selectedComponent === n.id;
+              return (
+                <li key={n.id}>
+                  <button
+                    onClick={() => selectComponent(active ? null : n.id)}
+                    className={`flex w-full items-center gap-2 px-3 py-1.5 text-left hover:bg-accent ${
+                      active ? "bg-accent font-semibold" : ""
+                    }`}
+                    style={{ paddingLeft: 12 + (query ? 0 : n.depth * 12) }}
+                  >
+                    <StatusDot status={st?.status ?? "UNKNOWN"} />
+                    <span className="truncate">{n.name}</span>
+                    <span className="mono-num ml-auto text-[10px] text-muted-foreground">
+                      {st?.health === null || st?.health === undefined ? "—" : st.health}
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </Panel>
+
+        {/* CENTER — 3D */}
+        <Panel
+          title="3D engine representation"
+          subtitle={
+            profile.asset3d.fidelity === "GENERIC_APPROXIMATE"
+              ? "GENERIC / APPROXIMATE MODEL — not the real engine geometry"
+              : profile.asset3d.note
+          }
+          bodyClassName="p-0"
+        >
+          <div className="flex flex-wrap items-center gap-1.5 border-b border-border p-2 text-xs">
+            <button
+              onClick={() => setResetToken((t) => t + 1)}
+              className="inline-flex items-center gap-1 rounded border border-border px-2 py-1 hover:bg-accent"
+            >
+              <RotateCcw className="size-3.5" /> Reset view
+            </button>
+            <button
+              onClick={() => setOptions((o) => ({ ...o, isolate: !o.isolate }))}
+              className={`inline-flex items-center gap-1 rounded border border-border px-2 py-1 hover:bg-accent ${options.isolate ? "bg-accent font-semibold" : ""}`}
+            >
+              <Crosshair className="size-3.5" /> Isolate
+            </button>
+            <button
+              onClick={() => setOptions((o) => ({ ...o, section: !o.section }))}
+              className={`inline-flex items-center gap-1 rounded border border-border px-2 py-1 hover:bg-accent ${options.section ? "bg-accent font-semibold" : ""}`}
+            >
+              <Scissors className="size-3.5" /> Section
+            </button>
+            <button
+              onClick={() =>
+                setOptions((o) => ({
+                  ...o,
+                  hidden: selectedComponent
+                    ? o.hidden.includes(selectedComponent)
+                      ? o.hidden.filter((x) => x !== selectedComponent)
+                      : [...o.hidden, selectedComponent]
+                    : o.hidden,
+                }))
+              }
+              disabled={!selectedComponent}
+              className="inline-flex items-center gap-1 rounded border border-border px-2 py-1 hover:bg-accent disabled:opacity-40"
+            >
+              <EyeOff className="size-3.5" /> Hide/show
+            </button>
+            <button
+              onClick={() => setOptions((o) => ({ ...o, hidden: [] }))}
+              className="inline-flex items-center gap-1 rounded border border-border px-2 py-1 hover:bg-accent"
+            >
+              <Layers className="size-3.5" /> Show all
+            </button>
+            <label className="ml-1 inline-flex items-center gap-1.5">
+              <Boxes className="size-3.5" /> Explode
+              <input
+                type="range"
+                min={0}
+                max={1}
+                step={0.05}
+                value={options.exploded}
+                onChange={(e) => setOptions((o) => ({ ...o, exploded: +e.target.value }))}
+                className="w-24"
+              />
+            </label>
+            <label className="inline-flex items-center gap-1.5">
+              <SignalIcon className="size-3.5" />
+              <input
+                type="checkbox"
+                checked={options.showSensors}
+                onChange={(e) => setOptions((o) => ({ ...o, showSensors: e.target.checked }))}
+              />
+              Sensors
+            </label>
+            <select
+              value={options.overlay}
+              onChange={(e) =>
+                setOptions((o) => ({ ...o, overlay: e.target.value as ViewerOptions["overlay"] }))
+              }
+              className="ml-auto rounded border border-border bg-card px-2 py-1"
+            >
+              <option value="status">Overlay: component status</option>
+              <option value="temperature">Overlay: temperature deviation</option>
+              <option value="vibration">Overlay: vibration deviation</option>
+              <option value="pressure">Overlay: pressure deviation</option>
+            </select>
+          </div>
+
+          <div className="h-[430px] w-full bg-surface">
+            {mounted ? (
+              <Suspense
+                fallback={
+                  <div className="flex h-full items-center justify-center text-xs text-muted-foreground">
+                    Loading 3D engine…
+                  </div>
+                }
+              >
+                <Engine3D
+                  profile={profile}
+                  state={twinState}
+                  selected={selectedComponent}
+                  onSelect={selectComponent}
+                  options={options}
+                  resetToken={resetToken}
+                />
+              </Suspense>
+            ) : (
+              <div className="flex h-full items-center justify-center text-xs text-muted-foreground">
+                Initialising viewer…
+              </div>
+            )}
+          </div>
+
+          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border px-3 py-2 text-[11px] text-muted-foreground">
+            <span>
+              Colours are derived from Twin State only ·{" "}
+              {twinState.synchronised
+                ? `3D updated ${sync.twinUpdatedAt ? new Date(sync.twinUpdatedAt).toISOString().slice(11, 23) : "—"}`
+                : "3D shows STATIC CONFIGURATION — no valid telemetry"}
+            </span>
+            <span className="mono-num">
+              {profile.asset3d.fidelity === "GENERIC_APPROXIMATE" ? "GENERIC / APPROXIMATE" : profile.asset3d.fidelity}
+            </span>
+          </div>
+        </Panel>
+
+        {/* RIGHT — component inspection */}
+        <Panel
+          title={selected ? selected.name : "Component inspection"}
+          subtitle={selected ? `${selected.id} · ${selected.subsystem}` : "Select a component in the tree or the 3D scene"}
+        >
+          {!selected ? (
+            <div className="space-y-3 text-xs text-muted-foreground">
+              <div>
+                <div className="label-xs">Engine health</div>
+                <div className="mono-num text-2xl text-foreground">
+                  {twinState.engineHealth === null ? "NOT EVALUATED" : fmt(twinState.engineHealth)}
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  ["Operating state", twinState.operatingState.replace("_", " ")],
+                  ["Engine status", twinState.engineStatus],
+                  ["Data quality", twinState.dataQuality === null ? "—" : `${(twinState.dataQuality * 100).toFixed(0)}%`],
+                  ["Twin confidence", twinState.twinConfidence === null ? "—" : `${(twinState.twinConfidence * 100).toFixed(0)}%`],
+                  ["Mission risk", twinState.missionRiskLevel ?? "NOT AVAILABLE"],
+                  ["RUL", twinState.rul?.available ? `${fmt(twinState.rul.hours)} h` : "NOT AVAILABLE"],
+                ].map(([k, v]) => (
+                  <div key={k as string} className="rounded border border-border bg-surface p-2">
+                    <div className="label-xs">{k}</div>
+                    <div className="mono-num text-foreground">{v}</div>
+                  </div>
+                ))}
+              </div>
+              {twinState.rul && !twinState.rul.available && (
+                <p>Reason: {twinState.rul.reason}</p>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-3 text-xs">
+              <div className="flex items-center justify-between">
+                <StatusPill tone={COMPONENT_STATUS_TONE[selected.status]}>{selected.status}</StatusPill>
+                <span className="mono-num text-muted-foreground">
+                  confidence {(selected.confidence * 100).toFixed(0)}%
+                </span>
+              </div>
+              <div>
+                <div className="label-xs">Component health</div>
+                <div className="mono-num text-2xl">
+                  {selected.health === null ? "NOT EVALUATED" : selected.health}
+                </div>
+                {selected.health !== null && <Bar value={selected.health / 100} tone={COMPONENT_STATUS_TONE[selected.status] as Tone} />}
+              </div>
+              <p className="text-muted-foreground">{selected.reason}</p>
+
+              <div>
+                <div className="label-xs mb-1">Contributing telemetry</div>
+                {selected.contributions.length === 0 ? (
+                  <p className="text-muted-foreground">No sensor mapped to this component.</p>
+                ) : (
+                  <table className="w-full">
+                    <tbody className="divide-y divide-border">
+                      {selected.contributions.map((c) => (
+                        <tr key={c.tag}>
+                          <td className="py-1 pr-2">
+                            <div className="font-medium">{SENSOR_MAP[c.channel].label}</div>
+                            <div className="text-[10px] text-muted-foreground">{c.tag} · w {c.weight}</div>
+                          </td>
+                          <td className="mono-num py-1 text-right">
+                            {c.value === null ? "—" : c.value.toFixed(2)} {SENSOR_MAP[c.channel].unit}
+                          </td>
+                          <td className="mono-num py-1 pl-2 text-right text-muted-foreground">
+                            {c.normResidual === null ? "n/a" : `${c.normResidual.toFixed(2)}σ`}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+
+              <div>
+                <div className="label-xs mb-1">Fault hypotheses</div>
+                {selected.faultHypotheses.length === 0 ? (
+                  <p className="text-muted-foreground">No supported hypothesis implicates this component.</p>
+                ) : (
+                  selected.faultHypotheses.slice(0, 4).map((h) => (
+                    <div key={h.id} className="mb-1">
+                      <div className="flex justify-between">
+                        <span className="capitalize">{h.label}</span>
+                        <span className="mono-num">{(h.probability * 100).toFixed(0)}%</span>
+                      </div>
+                      <Bar value={h.probability} tone={h.probability > 0.6 ? "crit" : "warn"} />
+                    </div>
+                  ))
+                )}
+              </div>
+
+              <div>
+                <div className="label-xs mb-1">Last update</div>
+                <div className="mono-num text-muted-foreground">
+                  {sync.sourceTimestamp ? new Date(sync.sourceTimestamp).toISOString().slice(11, 23) : "—"} UTC
+                </div>
+              </div>
+            </div>
+          )}
+        </Panel>
+      </div>
+
+      {/* BOTTOM — trends, reasoning, sync, validation */}
+      <div className="grid gap-4 xl:grid-cols-2">
+        <Panel
+          title="Component telemetry trend"
+          subtitle={selected ? `Channels mapped to ${selected.name}` : "Select a component"}
+        >
+          {selected && trendChannels.length ? (
+            <TrendChart
+              data={trendData}
+              height={200}
+              series={trendChannels.map((ch, i) => ({
+                key: ch,
+                label: SENSOR_MAP[ch].label,
+                color: `var(--color-chart-${(i % 5) + 1})`,
+              }))}
+            />
+          ) : (
+            <p className="p-4 text-xs text-muted-foreground">
+              No mapped channel to plot for the current selection.
+            </p>
+          )}
+        </Panel>
+
+        <Panel title="Reasoning path" subtitle="Sensor → feature → component → subsystem → engine → mission">
+          {selected ? (
+            <ol className="space-y-1.5 text-xs">
+              {reasoningPath(twinState, selected.id).map((step) => (
+                <li key={step.layer} className="rounded border border-border bg-surface px-2.5 py-1.5">
+                  <div className="flex justify-between gap-2">
+                    <span className="label-xs">{step.layer}</span>
+                    <span className="mono-num">{step.value}</span>
+                  </div>
+                  <div className="text-muted-foreground">{step.detail}</div>
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <p className="p-4 text-xs text-muted-foreground">
+              Select a component to trace its conclusion back to the source data.
+            </p>
+          )}
+        </Panel>
+      </div>
 
       <div className="grid gap-4 xl:grid-cols-2">
-        <Panel title="Normalised residual trend" subtitle="σ units, zero = twin agreement">
-          <TrendChart
-            data={residualSeries}
-            height={220}
-            zeroLine
-            series={[
-              { key: "rpm", label: "Engine speed", color: "var(--color-chart-1)" },
-              { key: "engTemp", label: "CHT", color: "var(--color-chart-4)" },
-              { key: "oilPress", label: "Oil pressure", color: "var(--color-chart-2)" },
-              { key: "vib", label: "Vibration", color: "var(--color-chart-3)" },
-            ]}
-          />
+        <Panel title="Synchronisation monitor" subtitle="Measured, not estimated">
+          <div className="grid grid-cols-2 gap-2 text-xs sm:grid-cols-3">
+            {[
+              ["Source", source === "REPLAY" ? "Replay file" : "Simulator"],
+              ["Source timestamp", sync.sourceTimestamp ? new Date(sync.sourceTimestamp).toISOString().slice(11, 23) : "—"],
+              ["Twin update", sync.twinUpdatedAt ? new Date(sync.twinUpdatedAt).toISOString().slice(11, 23) : "—"],
+              ["Processing latency", sync.processingLatencyMs === null ? "—" : `${sync.processingLatencyMs.toFixed(2)} ms`],
+              ["Ingest latency", sync.ingestLatencyMs === null ? "—" : `${sync.ingestLatencyMs.toFixed(0)} ms`],
+              ["Frames processed", String(sync.framesProcessed)],
+              ["Dropped frames", String(sync.droppedFrames)],
+              ["Frame gap", sync.gapMs === null ? "—" : `${sync.gapMs} ms`],
+              ["Synchronised", twinState.synchronised ? "YES" : "NO"],
+            ].map(([k, v]) => (
+              <div key={k} className="rounded border border-border bg-surface p-2">
+                <div className="label-xs">{k}</div>
+                <div className="mono-num">{v}</div>
+              </div>
+            ))}
+          </div>
         </Panel>
-        <Panel title="Twin confidence vs data quality" subtitle="Percent">
-          <TrendChart
-            data={confSeries}
-            height={220}
-            yDomain={[0, 100]}
-            series={[
-              { key: "twin", label: "Twin confidence", color: "var(--color-chart-1)" },
-              { key: "quality", label: "Data quality", color: "var(--color-chart-2)" },
-            ]}
-          />
+
+        <Panel title="3D twin configuration validation" subtitle="Coverage of the declared model package">
+          <div className="space-y-2 text-xs">
+            <div className="grid grid-cols-2 gap-2">
+              <div className="rounded border border-border bg-surface p-2">
+                <div className="label-xs">Engine model</div>
+                <div className="mono-num">{profile.engineId}</div>
+              </div>
+              <div className="rounded border border-border bg-surface p-2">
+                <div className="label-xs">3D asset</div>
+                <div className="mono-num">{profile.asset3d.url ?? "none supplied"}</div>
+              </div>
+              <div className="rounded border border-border bg-surface p-2">
+                <div className="label-xs">Component mapping</div>
+                <div className="mono-num">{coverage.coveragePct}% complete</div>
+              </div>
+              <div className="rounded border border-border bg-surface p-2">
+                <div className="label-xs">Unmapped 3D components</div>
+                <div className="mono-num">{coverage.unmappedComponents.length}</div>
+              </div>
+            </div>
+            <Bar value={coverage.coveragePct / 100} tone={coverage.coveragePct > 80 ? "ok" : "warn"} />
+            <p className="text-muted-foreground">
+              Unmapped telemetry channels: {coverage.unmappedChannels.length}
+              {coverage.unmappedComponents.length > 0 && (
+                <>
+                  {" "}
+                  · Unmapped components:{" "}
+                  {coverage.unmappedComponents.map((c) => c.id).join(", ")}
+                </>
+              )}
+            </p>
+            <p className="text-muted-foreground">{profile.asset3d.note}</p>
+          </div>
         </Panel>
       </div>
 
-      <Panel title="Twin model composition" subtitle="Replaceable model blocks behind a fixed data contract">
-        <div className="grid gap-3 md:grid-cols-2">
-          {MODEL_BLOCKS.map((m) => (
-            <div key={m.name} className="rounded-md border border-border bg-surface p-3">
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-sm font-semibold">{m.name}</span>
-                <ProvenanceTag p="model" />
-              </div>
-              <div className="mt-1 text-xs text-muted-foreground">Outputs: {m.outputs}</div>
-              <div className="text-xs text-muted-foreground">Basis: {m.basis}</div>
-            </div>
-          ))}
-        </div>
+      <Panel title="Event timeline" subtitle="Non-nominal frames in the retained window" bodyClassName="p-0">
+        {events.length === 0 ? (
+          <p className="p-4 text-xs text-muted-foreground">No non-nominal frame in the retained window.</p>
+        ) : (
+          <ul className="divide-y divide-border text-xs">
+            {events.map((e) => (
+              <li key={e.seq} className="flex items-center gap-3 px-4 py-2">
+                <span className="mono-num text-muted-foreground">
+                  {new Date(e.t).toISOString().slice(11, 19)}
+                </span>
+                <StatusPill tone={e.status === "CRITICAL" ? "crit" : "warn"}>{e.status}</StatusPill>
+                <span className="truncate text-muted-foreground">{e.recommendation}</span>
+              </li>
+            ))}
+          </ul>
+        )}
       </Panel>
 
       <PrototypeNotice>
-        The twin is a reduced-order engineering approximation tuned to simulated data. It has not been
-        calibrated against a physical test rig; residual thresholds are provisional.
+        The 3D representation is a generic approximate layout built from the declared component
+        hierarchy — no vendor CAD geometry has been supplied. Component states are computed from
+        simulated or replayed telemetry and have not been validated against a physical engine.
       </PrototypeNotice>
-    </>
+    </div>
   );
 }

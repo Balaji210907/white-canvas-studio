@@ -14,8 +14,11 @@ import { Route as ConfigurationRouteImport } from './routes/configuration'
 import { Route as DiagnosisRouteImport } from './routes/diagnosis'
 import { Route as HealthRouteImport } from './routes/health'
 import { Route as HistoryRouteImport } from './routes/history'
+import { Route as ImportRouteImport } from './routes/import'
 import { Route as MissionRouteImport } from './routes/mission'
 import { Route as ModelsRouteImport } from './routes/models'
+import { Route as ReportRouteImport } from './routes/report'
+import { Route as ResidualsRouteImport } from './routes/residuals'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SimulationRouteImport } from './routes/simulation'
 import { Route as SourcesRouteImport } from './routes/sources'
@@ -50,6 +53,11 @@ const HistoryRoute = HistoryRouteImport.update({
   path: '/history',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ImportRoute = ImportRouteImport.update({
+  id: '/import',
+  path: '/import',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MissionRoute = MissionRouteImport.update({
   id: '/mission',
   path: '/mission',
@@ -58,6 +66,16 @@ const MissionRoute = MissionRouteImport.update({
 const ModelsRoute = ModelsRouteImport.update({
   id: '/models',
   path: '/models',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReportRoute = ReportRouteImport.update({
+  id: '/report',
+  path: '/report',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResidualsRoute = ResidualsRouteImport.update({
+  id: '/residuals',
+  path: '/residuals',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SettingsRoute = SettingsRouteImport.update({
@@ -107,8 +125,11 @@ export interface FileRoutesByFullPath {
   '/diagnosis': typeof DiagnosisRoute
   '/health': typeof HealthRoute
   '/history': typeof HistoryRoute
+  '/import': typeof ImportRoute
   '/mission': typeof MissionRoute
   '/models': typeof ModelsRoute
+  '/report': typeof ReportRoute
+  '/residuals': typeof ResidualsRoute
   '/settings': typeof SettingsRoute
   '/simulation': typeof SimulationRoute
   '/sources': typeof SourcesRoute
@@ -124,8 +145,11 @@ export interface FileRoutesByTo {
   '/diagnosis': typeof DiagnosisRoute
   '/health': typeof HealthRoute
   '/history': typeof HistoryRoute
+  '/import': typeof ImportRoute
   '/mission': typeof MissionRoute
   '/models': typeof ModelsRoute
+  '/report': typeof ReportRoute
+  '/residuals': typeof ResidualsRoute
   '/settings': typeof SettingsRoute
   '/simulation': typeof SimulationRoute
   '/sources': typeof SourcesRoute
@@ -142,8 +166,11 @@ export interface FileRoutesById {
   '/diagnosis': typeof DiagnosisRoute
   '/health': typeof HealthRoute
   '/history': typeof HistoryRoute
+  '/import': typeof ImportRoute
   '/mission': typeof MissionRoute
   '/models': typeof ModelsRoute
+  '/report': typeof ReportRoute
+  '/residuals': typeof ResidualsRoute
   '/settings': typeof SettingsRoute
   '/simulation': typeof SimulationRoute
   '/sources': typeof SourcesRoute
@@ -161,8 +188,11 @@ export interface FileRouteTypes {
     | '/diagnosis'
     | '/health'
     | '/history'
+    | '/import'
     | '/mission'
     | '/models'
+    | '/report'
+    | '/residuals'
     | '/settings'
     | '/simulation'
     | '/sources'
@@ -178,8 +208,11 @@ export interface FileRouteTypes {
     | '/diagnosis'
     | '/health'
     | '/history'
+    | '/import'
     | '/mission'
     | '/models'
+    | '/report'
+    | '/residuals'
     | '/settings'
     | '/simulation'
     | '/sources'
@@ -195,8 +228,11 @@ export interface FileRouteTypes {
     | '/diagnosis'
     | '/health'
     | '/history'
+    | '/import'
     | '/mission'
     | '/models'
+    | '/report'
+    | '/residuals'
     | '/settings'
     | '/simulation'
     | '/sources'
@@ -213,8 +249,11 @@ export interface RootRouteChildren {
   DiagnosisRoute: typeof DiagnosisRoute
   HealthRoute: typeof HealthRoute
   HistoryRoute: typeof HistoryRoute
+  ImportRoute: typeof ImportRoute
   MissionRoute: typeof MissionRoute
   ModelsRoute: typeof ModelsRoute
+  ReportRoute: typeof ReportRoute
+  ResidualsRoute: typeof ResidualsRoute
   SettingsRoute: typeof SettingsRoute
   SimulationRoute: typeof SimulationRoute
   SourcesRoute: typeof SourcesRoute
@@ -262,6 +301,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HistoryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/import': {
+      id: '/import'
+      path: '/import'
+      fullPath: '/import'
+      preLoaderRoute: typeof ImportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/mission': {
       id: '/mission'
       path: '/mission'
@@ -274,6 +320,20 @@ declare module '@tanstack/react-router' {
       path: '/models'
       fullPath: '/models'
       preLoaderRoute: typeof ModelsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/report': {
+      id: '/report'
+      path: '/report'
+      fullPath: '/report'
+      preLoaderRoute: typeof ReportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/residuals': {
+      id: '/residuals'
+      path: '/residuals'
+      fullPath: '/residuals'
+      preLoaderRoute: typeof ResidualsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/settings': {
@@ -341,8 +401,11 @@ const rootRouteChildren: RootRouteChildren = {
   DiagnosisRoute: DiagnosisRoute,
   HealthRoute: HealthRoute,
   HistoryRoute: HistoryRoute,
+  ImportRoute: ImportRoute,
   MissionRoute: MissionRoute,
   ModelsRoute: ModelsRoute,
+  ReportRoute: ReportRoute,
+  ResidualsRoute: ResidualsRoute,
   SettingsRoute: SettingsRoute,
   SimulationRoute: SimulationRoute,
   SourcesRoute: SourcesRoute,
