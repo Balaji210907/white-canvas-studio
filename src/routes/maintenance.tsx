@@ -73,9 +73,9 @@ function MaintenancePage() {
       if (!urgency || c.derived) continue;
       const evidence: string[] = [];
       for (const contrib of c.contributions.slice(0, 3)) {
-        evidence.push(
-          `${contrib.label}: normalised residual ${contrib.normResidual >= 0 ? "+" : ""}${contrib.normResidual.toFixed(2)}σ`,
-        );
+        if (contrib.normResidual === null) continue;
+        const n = contrib.normResidual;
+        evidence.push(`${contrib.tag}: normalised residual ${n >= 0 ? "+" : ""}${n.toFixed(2)}σ`);
       }
       for (const h of c.faultHypotheses.slice(0, 2)) {
         evidence.push(`Hypothesis ${h.label} at ${(h.probability * 100).toFixed(0)}% support`);
