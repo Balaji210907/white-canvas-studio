@@ -143,22 +143,38 @@ function SensorMarkers({
         .map((s) => {
           const reading = state.frame?.readings[s.channel];
           const ok = reading && reading.status === "HEALTHY";
+          const col = ok ? "#1f6feb" : reading ? "#d18a19" : "#9aa3ad";
+          const loc = s.location as [number, number, number];
           return (
-            <mesh
+            <group
               key={s.tag}
-              position={s.location as [number, number, number]}
+              position={loc}
               onClick={(e: ThreeEvent<MouseEvent>) => {
                 e.stopPropagation();
                 onSelect(s.tag);
               }}
             >
-              <sphereGeometry args={[0.022, 14, 12]} />
-              <meshStandardMaterial
-                color={ok ? "#1f6feb" : reading ? "#d18a19" : "#9aa3ad"}
-                emissive={ok ? "#1f6feb" : "#d18a19"}
-                emissiveIntensity={0.4}
-              />
-            </mesh>
+              {/* mount boss */}
+              <mesh>
+                <cylinderGeometry args={[0.012, 0.014, 0.02, 12]} />
+                <meshStandardMaterial color={col} metalness={0.7} roughness={0.35} />
+              </mesh>
+              {/* sensor body */}
+              <mesh position={[0, 0.024, 0]}>
+                <cylinderGeometry args={[0.009, 0.009, 0.03, 12]} />
+                <meshStandardMaterial color={col} emissive={col} emissiveIntensity={0.35} metalness={0.6} roughness={0.4} />
+              </mesh>
+              {/* harness lead */}
+              <mesh position={[0, 0.05, 0]} rotation={[0, 0, 0.5]}>
+                <cylinderGeometry args={[0.003, 0.003, 0.05, 8]} />
+                <meshStandardMaterial color="#4a5158" metalness={0.2} roughness={0.9} />
+              </mesh>
+              <Html distanceFactor={3} position={[0, 0.085, 0]} className="pointer-events-none">
+                <div className="whitespace-nowrap rounded border border-border bg-card/90 px-1 text-[9px] font-mono text-muted-foreground">
+                  {s.tag}
+                </div>
+              </Html>
+            </group>
           );
         })}
     </>
