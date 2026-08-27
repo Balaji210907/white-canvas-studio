@@ -27,18 +27,13 @@ export interface ViewerOptions {
   overlay: "status" | "temperature" | "vibration" | "pressure";
 }
 
-function geometryFor(spec: GeometrySpec) {
-  const [a, b, c] = spec.size;
-  switch (spec.shape) {
-    case "cylinder":
-      return <cylinderGeometry args={[a, b, c, 28]} />;
-    case "sphere":
-      return <sphereGeometry args={[a, 20, 16]} />;
-    case "torus":
-      return <torusGeometry args={[a, b, 12, 28]} />;
-    default:
-      return <boxGeometry args={[a, b, c]} />;
-  }
+/** Apply a per-part lightness multiplier to the state colour. */
+function shadeColor(hex: string, shade: number) {
+  const c = new THREE.Color(hex);
+  const hsl = { h: 0, s: 0, l: 0 };
+  c.getHSL(hsl);
+  c.setHSL(hsl.h, hsl.s, Math.max(0.05, Math.min(0.95, hsl.l * shade)));
+  return c;
 }
 
 function ComponentMesh({
@@ -62,7 +57,7 @@ function ComponentMesh({
   onSelect: (id: string) => void;
   pulse: boolean;
 }) {
-  const ref = useRef<THREE.Mesh>(null);
+  const group = useRef<THREE.Group>(null);
   const [hover, setHover] = useState(false);
   const base = spec.position;
   const pos: [number, number, number] = [
@@ -71,21 +66,28 @@ function ComponentMesh({
     base[2] * (1 + explode * 1.1),
   ];
 
+  const parts = useMemo(() => buildParts(spec), [spec]);
+  const colors = useMemo(() => parts.map((p) => shadeColor(color, p.shade)), [parts, color]);
+
   useFrame(({ clock }) => {
-    if (!ref.current) return;
-    const m = ref.current.material as THREE.MeshStandardMaterial;
-    m.emissiveIntensity = pulse
-      ? 0.35 + 0.25 * Math.sin(clock.elapsedTime * 4)
+    if (!group.current) return;
+    const intensity = pulse
+      ? 0.32 + 0.22 * Math.sin(clock.elapsedTime * 4)
       : selected
-        ? 0.45
+        ? 0.4
         : hover
-          ? 0.25
-          : 0.05;
+          ? 0.22
+          : 0.04;
+    group.current.traverse((o) => {
+      const mesh = o as THREE.Mesh;
+      const m = mesh.material as THREE.MeshStandardMaterial | undefined;
+      if (m && "emissiveIntensity" in m) m.emissiveIntensity = intensity;
+    });
   });
 
   return (
-    <mesh
-      ref={ref}
+    <group
+      ref={group}
       position={pos}
       rotation={spec.rotation ?? [0, 0, 0]}
       onPointerOver={(e: ThreeEvent<PointerEvent>) => {
@@ -98,25 +100,31 @@ function ComponentMesh({
         onSelect(id);
       }}
     >
-      {geometryFor(spec)}
-      <meshStandardMaterial
-        color={color}
-        emissive={color}
-        transparent={dimmed}
-        opacity={dimmed ? 0.12 : 1}
-        roughness={0.55}
-        metalness={0.25}
-      />
+      {parts.map((p, i) => (
+        <mesh key={p.key} position={p.position} rotation={p.rotation ?? [0, 0, 0]}>
+          {p.geometry}
+          <meshStandardMaterial
+            color={colors[i]}
+            emissive={color}
+            transparent={dimmed}
+            opacity={dimmed ? 0.1 : 1}
+            roughness={p.roughness}
+            metalness={p.metalness}
+          />
+        </mesh>
+      ))}
       {(selected || hover) && !dimmed && (
         <Html distanceFactor={2.4} position={[0, 0.16, 0]} className="pointer-events-none">
           <div className="whitespace-nowrap rounded border border-border bg-card/95 px-1.5 py-0.5 text-[10px] font-semibold text-foreground shadow">
             {name}
+            <span className="ml-1 font-mono text-[9px] font-normal text-muted-foreground">{id}</span>
           </div>
         </Html>
       )}
-    </mesh>
+    </group>
   );
 }
+
 
 function SensorMarkers({
   profile,
