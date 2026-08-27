@@ -6,7 +6,11 @@ import {
   Boxes,
   Cpu,
   Gauge,
+  FileText,
   GitCompareArrows,
+  Layers,
+  Upload,
+
   History,
   LayoutDashboard,
   Pause,
