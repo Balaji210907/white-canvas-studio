@@ -17,6 +17,7 @@ import { Route as DiagnosisRouteImport } from './routes/diagnosis'
 import { Route as HealthRouteImport } from './routes/health'
 import { Route as HistoryRouteImport } from './routes/history'
 import { Route as ImportRouteImport } from './routes/import'
+import { Route as MaintenanceRouteImport } from './routes/maintenance'
 import { Route as MissionRouteImport } from './routes/mission'
 import { Route as ModelsRouteImport } from './routes/models'
 import { Route as ReportRouteImport } from './routes/report'
@@ -68,6 +69,11 @@ const HistoryRoute = HistoryRouteImport.update({
 const ImportRoute = ImportRouteImport.update({
   id: '/import',
   path: '/import',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MaintenanceRoute = MaintenanceRouteImport.update({
+  id: '/maintenance',
+  path: '/maintenance',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MissionRoute = MissionRouteImport.update({
@@ -140,6 +146,7 @@ export interface FileRoutesByFullPath {
   '/health': typeof HealthRoute
   '/history': typeof HistoryRoute
   '/import': typeof ImportRoute
+  '/maintenance': typeof MaintenanceRoute
   '/mission': typeof MissionRoute
   '/models': typeof ModelsRoute
   '/report': typeof ReportRoute
@@ -162,6 +169,7 @@ export interface FileRoutesByTo {
   '/health': typeof HealthRoute
   '/history': typeof HistoryRoute
   '/import': typeof ImportRoute
+  '/maintenance': typeof MaintenanceRoute
   '/mission': typeof MissionRoute
   '/models': typeof ModelsRoute
   '/report': typeof ReportRoute
@@ -185,6 +193,7 @@ export interface FileRoutesById {
   '/health': typeof HealthRoute
   '/history': typeof HistoryRoute
   '/import': typeof ImportRoute
+  '/maintenance': typeof MaintenanceRoute
   '/mission': typeof MissionRoute
   '/models': typeof ModelsRoute
   '/report': typeof ReportRoute
@@ -209,6 +218,7 @@ export interface FileRouteTypes {
     | '/health'
     | '/history'
     | '/import'
+    | '/maintenance'
     | '/mission'
     | '/models'
     | '/report'
@@ -231,6 +241,7 @@ export interface FileRouteTypes {
     | '/health'
     | '/history'
     | '/import'
+    | '/maintenance'
     | '/mission'
     | '/models'
     | '/report'
@@ -253,6 +264,7 @@ export interface FileRouteTypes {
     | '/health'
     | '/history'
     | '/import'
+    | '/maintenance'
     | '/mission'
     | '/models'
     | '/report'
@@ -276,6 +288,7 @@ export interface RootRouteChildren {
   HealthRoute: typeof HealthRoute
   HistoryRoute: typeof HistoryRoute
   ImportRoute: typeof ImportRoute
+  MaintenanceRoute: typeof MaintenanceRoute
   MissionRoute: typeof MissionRoute
   ModelsRoute: typeof ModelsRoute
   ReportRoute: typeof ReportRoute
@@ -346,6 +359,13 @@ declare module '@tanstack/react-router' {
       path: '/import'
       fullPath: '/import'
       preLoaderRoute: typeof ImportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/maintenance': {
+      id: '/maintenance'
+      path: '/maintenance'
+      fullPath: '/maintenance'
+      preLoaderRoute: typeof MaintenanceRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/mission': {
@@ -444,6 +464,7 @@ const rootRouteChildren: RootRouteChildren = {
   HealthRoute: HealthRoute,
   HistoryRoute: HistoryRoute,
   ImportRoute: ImportRoute,
+  MaintenanceRoute: MaintenanceRoute,
   MissionRoute: MissionRoute,
   ModelsRoute: ModelsRoute,
   ReportRoute: ReportRoute,
