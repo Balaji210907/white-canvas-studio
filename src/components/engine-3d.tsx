@@ -105,7 +105,7 @@ function ComponentMesh({
         <mesh key={p.key} position={p.position} rotation={p.rotation ?? [0, 0, 0]}>
           {p.geometry}
           <meshStandardMaterial
-            color={colors[i]}
+            color={colors[i] ?? color}
             emissive={color}
             transparent={dimmed}
             opacity={dimmed ? 0.1 : 1}
